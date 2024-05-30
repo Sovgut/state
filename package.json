@@ -1,12 +1,13 @@
 {
   "name": "@sovgut/state",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "type": "module",
   "repository": "https://github.com/Sovgut/state.git",
   "author": {
     "name": "Serhii Sovhut",
     "url": "https://github.com/Sovgut"
   },
+  "license": "MIT",
   "scripts": {
     "test": "vitest run",
     "build": "tsc && vite build"
