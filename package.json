@@ -24,7 +24,7 @@
   "files": [
     "dist"
   ],
-  "exports": "./dist/state.js",
-  "module": "./dist/state.js",
+  "exports": "./dist/main.js",
+  "module": "./dist/main.js",
   "types": "./dist/main.d.ts"
 }

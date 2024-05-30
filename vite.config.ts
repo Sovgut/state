@@ -11,6 +11,7 @@ export default defineConfig({
   build: {
     copyPublicDir: false,
     lib: {
+      fileName: "main",
       entry: resolve("src", "main.ts"),
       formats: ["es"],
     },
