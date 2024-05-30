@@ -75,7 +75,7 @@ jobs:
           name: dist
           path: dist
 
-  publish-gpr:
+  publish:
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -90,6 +90,9 @@ jobs:
         with:
           name: dist
           path: dist
+
+      - name: Configure npm for publishing
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Publish to npm
         run: npm publish --access public
