@@ -1,10 +1,77 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BaseState } from "./base";
 import { UnsupportedException } from "@/errors/unsupported/unsupported";
 
 afterEach(() => (BaseState.provider = undefined));
 
 describe(BaseState.name, () => {
+  it("should trigger event when a key is set", () => {
+    BaseState.removeAllListeners();
+    BaseState.provider = localStorage;
+    BaseState.clear();
+
+    const callback = vi.fn();
+    BaseState.on("test-key", callback);
+
+    BaseState.set("test-key", "test-value");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "BaseState",
+    });
+  });
+
+  it("should trigger event once when a key is set with once", () => {
+    BaseState.removeAllListeners();
+    BaseState.provider = localStorage;
+    BaseState.clear();
+
+    const callback = vi.fn();
+    BaseState.once("test-key", callback);
+
+    BaseState.set("test-key", "test-value");
+    BaseState.set("test-key", "another-value");
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "BaseState",
+    });
+  });
+
+  it("should not trigger event after it is removed", () => {
+    BaseState.removeAllListeners();
+    BaseState.provider = localStorage;
+    BaseState.clear();
+
+    const callback = vi.fn();
+    BaseState.on("test-key", callback);
+    BaseState.off("test-key", callback);
+
+    BaseState.set("test-key", "test-value");
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("should trigger event when a key is unset", () => {
+    BaseState.removeAllListeners();
+    BaseState.provider = localStorage;
+    BaseState.clear();
+
+    const callback = vi.fn();
+    BaseState.on("test-key", callback);
+
+    BaseState.set("test-key", "test-value");
+    BaseState.unset("test-key");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      provider: "BaseState",
+    });
+  });
+
   it("Write and read data", () => {
     expect.assertions(2);
 
