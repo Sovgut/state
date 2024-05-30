@@ -2,6 +2,7 @@ import { BaseState } from "../base/base";
 
 export class CookieState extends BaseState {
   static {
+    CookieState.type = "CookieState"
     CookieState.provider = {
       getItem(key: string) {
         const name = key + "=";

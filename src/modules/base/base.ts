@@ -3,10 +3,19 @@ import { ISupportedPrimitive, IProvider } from "@/types";
 import EventEmitter from "eventemitter3";
 
 export class BaseState {
+  protected static type = "BaseState";
   private static observer = new EventEmitter()
   public static provider: IProvider | undefined = undefined;
 
   public static on(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
+    this.observer.on(event, callback);
+  }
+
+  public static once(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
+    this.observer.on(event, callback);
+  }
+
+  public static off(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
     this.observer.on(event, callback);
   }
 
@@ -54,27 +63,27 @@ export class BaseState {
     switch (typeof value) {
       case "bigint": {
         this.provider.setItem(key, value.toString());
-        this.observer.emit(`${key}:set`);
+        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
         break;
       }
       case "boolean": {
         this.provider.setItem(key, String(value));
-        this.observer.emit(`${key}:set`);
+        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
         break; 
       }
       case "number": {
         this.provider.setItem(key, String(value));
-        this.observer.emit(`${key}:set`);
+        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
         break; 
       }
       case "object": {
         this.provider.setItem(key, JSON.stringify(value));
-        this.observer.emit(`${key}:set`);
+        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
         break; 
       }
       case "string": {
         this.provider.setItem(key, value);
-        this.observer.emit(`${key}:set`);
+        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
         break; 
       }
     }
@@ -86,7 +95,7 @@ export class BaseState {
     }
 
     this.provider.removeItem(key);
-    this.observer.emit(`${key}:unset`);
+    this.observer.emit(`${key}:unset`, {  key, type: this.type });
   }
 
   public static clear(): void {
