@@ -7,15 +7,15 @@ export class BaseState {
   private static observer = new EventEmitter()
   public static provider: IProvider | undefined = undefined;
 
-  public static on(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
+  public static on(event: string, callback: (...args: any[]) => void): void {
     this.observer.on(event, callback);
   }
 
-  public static once(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
+  public static once(event: string, callback: (...args: any[]) => void): void {
     this.observer.on(event, callback);
   }
 
-  public static off(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
+  public static off(event: string, callback: (...args: any[]) => void): void {
     this.observer.on(event, callback);
   }
 
@@ -63,27 +63,27 @@ export class BaseState {
     switch (typeof value) {
       case "bigint": {
         this.provider.setItem(key, value.toString());
-        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, type: this.type });
         break;
       }
       case "boolean": {
         this.provider.setItem(key, String(value));
-        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, type: this.type });
         break; 
       }
       case "number": {
         this.provider.setItem(key, String(value));
-        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, type: this.type });
         break; 
       }
       case "object": {
         this.provider.setItem(key, JSON.stringify(value));
-        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, type: this.type });
         break; 
       }
       case "string": {
         this.provider.setItem(key, value);
-        this.observer.emit(`${key}:set`, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, type: this.type });
         break; 
       }
     }
@@ -95,7 +95,7 @@ export class BaseState {
     }
 
     this.provider.removeItem(key);
-    this.observer.emit(`${key}:unset`, {  key, type: this.type });
+    this.observer.emit(key, {  key, type: this.type });
   }
 
   public static clear(): void {
