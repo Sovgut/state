@@ -14,7 +14,7 @@ export interface IProvider {
 }
 
 export interface IProviderEvent {
-  type: string;
+  provider: string;
   key: string;
   value?: any;
 }
