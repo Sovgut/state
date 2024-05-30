@@ -6,6 +6,8 @@ import { URL, fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import dts from "vite-plugin-dts";
 
+import * as packageJson from './package.json'
+
 export default defineConfig({
   plugins: [dts()],
   build: {
@@ -15,6 +17,9 @@ export default defineConfig({
       entry: resolve("src", "main.ts"),
       formats: ["es"],
     },
+    rollupOptions: {
+      external: [...Object.keys(packageJson.peerDependencies)],
+    }
   },
   resolve: {
     alias: {

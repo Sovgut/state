@@ -1,6 +1,6 @@
 {
   "name": "@sovgut/state",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "type": "module",
   "repository": "https://github.com/Sovgut/state.git",
   "author": {
@@ -11,6 +11,9 @@
   "scripts": {
     "test": "vitest run",
     "build": "tsc && vite build"
+  },
+  "peerDependencies": {
+    "eventemitter3": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.13",

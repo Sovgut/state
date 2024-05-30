@@ -1,8 +1,14 @@
 import { UnsupportedException } from "@/errors/unsupported/unsupported";
 import { ISupportedPrimitive, IProvider } from "@/types";
+import EventEmitter from "eventemitter3";
 
 export class BaseState {
-  static provider: IProvider | undefined = undefined;
+  private static observer = new EventEmitter()
+  public static provider: IProvider | undefined = undefined;
+
+  public static on(event: `${string}:${'set' | 'unset'}`, callback: (...args: any[]) => void): void {
+    this.observer.on(event, callback);
+  }
 
   public static get<T = unknown>(
     key: string,
@@ -47,19 +53,29 @@ export class BaseState {
 
     switch (typeof value) {
       case "bigint": {
-        return this.provider.setItem(key, value.toString());
+        this.provider.setItem(key, value.toString());
+        this.observer.emit(`${key}:set`);
+        break;
       }
       case "boolean": {
-        return this.provider.setItem(key, String(value));
+        this.provider.setItem(key, String(value));
+        this.observer.emit(`${key}:set`);
+        break; 
       }
       case "number": {
-        return this.provider.setItem(key, String(value));
+        this.provider.setItem(key, String(value));
+        this.observer.emit(`${key}:set`);
+        break; 
       }
       case "object": {
-        return this.provider.setItem(key, JSON.stringify(value));
+        this.provider.setItem(key, JSON.stringify(value));
+        this.observer.emit(`${key}:set`);
+        break; 
       }
       case "string": {
-        return this.provider.setItem(key, value);
+        this.provider.setItem(key, value);
+        this.observer.emit(`${key}:set`);
+        break; 
       }
     }
   }
@@ -70,6 +86,7 @@ export class BaseState {
     }
 
     this.provider.removeItem(key);
+    this.observer.emit(`${key}:unset`);
   }
 
   public static clear(): void {
