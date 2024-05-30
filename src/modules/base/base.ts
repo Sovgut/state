@@ -12,11 +12,15 @@ export class BaseState {
   }
 
   public static once(event: string, callback: (data: IProviderEvent) => void): void {
-    this.observer.on(event, callback);
+    this.observer.once(event, callback);
   }
 
   public static off(event: string, callback: (data: IProviderEvent) => void): void {
-    this.observer.on(event, callback);
+    this.observer.off(event, callback);
+  }
+
+  public static removeAllListeners(): void {
+    this.observer.removeAllListeners();
   }
 
   public static get<T = unknown>(
@@ -63,27 +67,27 @@ export class BaseState {
     switch (typeof value) {
       case "bigint": {
         this.provider.setItem(key, value.toString());
-        this.observer.emit(key, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, provider: this.type });
         break;
       }
       case "boolean": {
         this.provider.setItem(key, String(value));
-        this.observer.emit(key, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, provider: this.type });
         break; 
       }
       case "number": {
         this.provider.setItem(key, String(value));
-        this.observer.emit(key, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, provider: this.type });
         break; 
       }
       case "object": {
         this.provider.setItem(key, JSON.stringify(value));
-        this.observer.emit(key, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, provider: this.type });
         break; 
       }
       case "string": {
         this.provider.setItem(key, value);
-        this.observer.emit(key, {  key, value, type: this.type });
+        this.observer.emit(key, {  key, value, provider: this.type });
         break; 
       }
     }
@@ -95,7 +99,7 @@ export class BaseState {
     }
 
     this.provider.removeItem(key);
-    this.observer.emit(key, {  key, type: this.type });
+    this.observer.emit(key, {  key, provider: this.type });
   }
 
   public static clear(): void {
