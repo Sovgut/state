@@ -35,7 +35,7 @@ export class CookieState extends BaseState {
         for (let i = 0; i < ca.length; i++) {
           let c = ca[i];
           const eqPos = c.indexOf("=");
-          const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+          const name = eqPos > -1 ? c.substring(0, eqPos) : c;
           document.cookie =
             name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
         }
