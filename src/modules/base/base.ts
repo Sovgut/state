@@ -1,5 +1,5 @@
 import { UnsupportedException } from "@/errors/unsupported/unsupported";
-import { ISupportedPrimitive, IProvider } from "@/types";
+import { ISupportedPrimitive, IProvider, IProviderEvent } from "@/types";
 import EventEmitter from "eventemitter3";
 
 export class BaseState {
@@ -7,15 +7,15 @@ export class BaseState {
   private static observer = new EventEmitter()
   public static provider: IProvider | undefined = undefined;
 
-  public static on(event: string, callback: (...args: any[]) => void): void {
+  public static on(event: string, callback: (data: IProviderEvent) => void): void {
     this.observer.on(event, callback);
   }
 
-  public static once(event: string, callback: (...args: any[]) => void): void {
+  public static once(event: string, callback: (data: IProviderEvent) => void): void {
     this.observer.on(event, callback);
   }
 
-  public static off(event: string, callback: (...args: any[]) => void): void {
+  public static off(event: string, callback: (data: IProviderEvent) => void): void {
     this.observer.on(event, callback);
   }
 

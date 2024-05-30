@@ -12,3 +12,9 @@ export interface IProvider {
   clear(): void;
   has?(key: string): boolean;
 }
+
+export interface IProviderEvent {
+  type: string;
+  key: string;
+  value?: any;
+}
