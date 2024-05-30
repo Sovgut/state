@@ -1,0 +1,7 @@
+vite.config.ts
+tsconfig.json
+src
+node_modules
+.gitignore
+README.md
+LICENSE
