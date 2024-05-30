@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check_version.outputs.version_changed }}
-      current_version: ${{ steps.check_version.outputs.current_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,7 +39,6 @@ jobs:
           CURR_VERSION=$(jq -r .version < package.json)
           echo "Previous version: $PREV_VERSION"
           echo "Current version: $CURR_VERSION"
-          echo "current_version=$CURR_VERSION" >> $GITHUB_OUTPUT
           if [ "$PREV_VERSION" = "none" ] || [ "$PREV_VERSION" != "$CURR_VERSION" ]; then
             echo "version_changed=true" >> $GITHUB_ENV
             echo "version_changed=true" >> $GITHUB_OUTPUT
@@ -78,12 +76,11 @@ jobs:
           path: dist
 
   publish:
-    needs: 
-        - build
-        - check-version
+    needs:
+      - build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -101,13 +98,3 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        with:
-          tag_name: v${{ needs.check-version.outputs.current_version }}
-          release_name: Release v${{ needs.check-version.outputs.current_version }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
