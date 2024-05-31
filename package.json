@@ -7,6 +7,26 @@
     "name": "Serhii Sovhut",
     "url": "https://github.com/Sovgut"
   },
+  "keywords": [
+    "state management",
+    "typescript",
+    "javascript",
+    "localstorage",
+    "sessionstorage",
+    "cookies",
+    "in-memory storage",
+    "observer pattern",
+    "event listeners",
+    "reactive state",
+    "state library",
+    "data storage",
+    "frontend",
+    "web development",
+    "custom storage providers",
+    "synchronous storage",
+    "lightweight",
+    "flexible state management"
+  ],
   "license": "MIT",
   "scripts": {
     "test": "vitest run",
