@@ -37,6 +37,41 @@ yarn add @sovgut/state
 import { LocalState, SessionState, MemoryState, CookieState } from "@sovgut/state";
 ```
 
+### Using in React Component
+
+Create a React component that uses the state and listens for changes using the observer mode.
+
+```tsx
+import { IProviderEvent, LocalState } from "@sovgut/state";
+import { memo, useCallback, useEffect, useState } from "react";
+
+export const App: React.FC = memo(() => {
+  const [value, setValue] = useState<number>(
+    LocalState.get("random-number-key", { fallback: Math.random() })
+  );
+
+  const handleUpdateEvent = useCallback((event: IProviderEvent<number>) => {
+    if (event.value) {
+        setValue(event.value)
+    }
+  }, []);
+
+  const handleOnClick = useCallback(() => {
+    LocalState.set("random-number-key", Math.random())
+  }, []);
+
+  useEffect(() => {
+    LocalState.on("random-number-key", handleUpdateEvent)
+
+    return function cleanup() {
+        LocalState.off("random-number-key", handleUpdateEvent)
+    }
+  }, [handleUpdateEvent]);
+
+  return <button onClick={handleOnClick}>Current Value: {value}</button>
+});
+```
+
 ### Setting Values
 
 You can store different types of values in the state:
@@ -147,7 +182,7 @@ LocalState.removeAllListeners();
 The event object contains the key, value, and provider of change:
 
 ```typescript
-export interface IProviderEvent {
+interface IProviderEvent<Value = unknown> {
   /**
    * The key of the item in the state that triggered the event.
    */
@@ -157,7 +192,7 @@ export interface IProviderEvent {
    * The value associated with the key in the state.
    * This is optional and can be of any type.
    */
-  value?: unknown;
+  value?: Value;
   
   /**
    * The provider type indicating the source of the state change.
