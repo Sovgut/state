@@ -6,4 +6,4 @@ export { CookieState } from "./modules/cookie/cookie";
 
 export { UnsupportedException } from "./errors/unsupported/unsupported";
 
-export type { IProvider, IProviderEvent, ISupportedPrimitive } from "./types";
+export type { IProvider, IProviderEvent, IProviderType, ISupportedPrimitive } from "./types";

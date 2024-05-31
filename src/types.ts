@@ -49,6 +49,8 @@ export interface IProvider {
   has?(key: string): boolean;
 }
 
+export type IProviderType = 'local' | 'session' | 'cookie' | 'memory' | string & NonNullable<unknown>;
+
 export interface IProviderEvent<Value = unknown> {
   /**
    * The key of the item in the state that triggered the event.
@@ -66,5 +68,5 @@ export interface IProviderEvent<Value = unknown> {
    * This will typically be one of the predefined types (local, session, cookie, memory),
    * or a custom provider type as a string.
    */
-  provider: 'local' | 'session' | 'cookie' | 'memory' | string & NonNullable<unknown>;
+  provider: IProviderType;
 }
