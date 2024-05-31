@@ -42,7 +42,7 @@ jobs:
             echo "version_changed=true" >> $GITHUB_OUTPUT
           fi
 
-  build:
+  test:
     runs-on: ubuntu-latest
     needs: check-version
     if: needs.check-version.outputs.version_changed == 'true'
@@ -55,11 +55,42 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
+        
       - name: Install dependencies
-        run: npm i
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
 
       - name: Test codebase
         run: npm run test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
+          
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
 
       - name: Building codebase
         run: npm run build
