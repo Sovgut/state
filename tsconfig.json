@@ -25,7 +25,8 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "removeComments": true
   },
   "include": [
     "src"

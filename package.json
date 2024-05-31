@@ -12,13 +12,12 @@
     "test": "vitest run",
     "build": "tsc && vite build"
   },
-  "peerDependencies": {
-    "eventemitter3": "^5.0.1"
-  },
   "devDependencies": {
     "@types/node": "^20.12.13",
     "@vitest/coverage-v8": "^1.6.0",
+    "eventemitter3": "^5.0.1",
     "jsdom": "^24.1.0",
+    "terser": "^5.31.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
     "vite-plugin-dts": "^3.9.1",
@@ -27,7 +26,12 @@
   "files": [
     "dist"
   ],
-  "exports": "./dist/main.js",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
   "module": "./dist/main.js",
-  "types": "./dist/main.d.ts"
+  "exports": {
+    ".": {
+      "import": "./dist/main.js"
+    }
+  }
 }

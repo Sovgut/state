@@ -4,22 +4,50 @@
 import { defineConfig } from "vite";
 import { URL, fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { minify } from "terser";
+
 import dts from "vite-plugin-dts";
 
-import * as packageJson from './package.json'
+function minifyBundles() {
+  return {
+    name: "minifyBundles",
+    async generateBundle(options, bundle) {
+      for (let key in bundle) {
+        if (bundle[key].type == 'chunk' && key.endsWith('.js')) {
+          const minifyCode = await minify(bundle[key].code, { sourceMap: false })
+          bundle[key].code = minifyCode.code
+        }
+      }
+      return bundle
+    },
+  }
+}
 
 export default defineConfig({
-  plugins: [dts()],
+  plugins: [
+    dts({
+      exclude: [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+      ],
+    }),
+    minifyBundles(),
+  ],
   build: {
     copyPublicDir: false,
+    sourcemap: false,
+    minify: true,
     lib: {
       fileName: "main",
+      name: '@sovgut/state',
       entry: resolve("src", "main.ts"),
       formats: ["es"],
     },
-    rollupOptions: {
-      external: [...Object.keys(packageJson.peerDependencies)],
-    }
+  },
+  optimizeDeps: {
+    include: ["eventemitter3"],
   },
   resolve: {
     alias: {
