@@ -23,25 +23,23 @@ jobs:
         run: |
           CURR_VERSION=$(grep '"version":' package.json | sed -E 's/.*"([^"]+)".*/\1/')
           echo "Current version in package.json: $CURR_VERSION"
-          echo "curr_version=$CURR_VERSION" >> $GITHUB_ENV
+          echo "curr_version=$CURR_VERSION" >> $GITHUB_OUTPUT
 
       - name: Get previous version from package.json
         id: get_previous_version
         run: |
           PREV_VERSION=$(git show HEAD~1:package.json | grep '"version":' | sed -E 's/.*"([^"]+)".*/\1/' || echo "none")
           echo "Previous version in package.json: $PREV_VERSION"
-          echo "prev_version=$PREV_VERSION" >> $GITHUB_ENV
+          echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
 
       - name: Check version increment
         id: check_version
         run: |
-          echo "Previous version: $PREV_VERSION"
-          echo "Current version: $CURR_VERSION"
-          if [ "$PREV_VERSION" = "none" ] || [ "$PREV_VERSION" != "$CURR_VERSION" ]; then
-            echo "version_changed=true" >> $GITHUB_ENV
+          echo "Previous version: ${{ steps.get_previous_version.outputs.version_changed }}"
+          echo "Current version: ${{ steps.get_current_version.outputs.version_changed }}"
+          if [ "$PREV_VERSION" = "none" ] || [ "${{ steps.get_current_version.outputs.version_changed }}" != "${{ steps.get_previous_version.outputs.version_changed }}" ]; then
             echo "version_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "version_changed=false" >> $GITHUB_ENV
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
