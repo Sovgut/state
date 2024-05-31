@@ -156,7 +156,7 @@ The event object contains the key, value, and provider of change:
 
 ## Extending to Custom Providers
 
-You can extend the `BaseState` class to support custom storage providers by implementing the `IProvider` interface:
+You can extend the `BaseState` class to support custom storage providers by implementing the `IProvider` interface. Note that `CustomState` only supports synchronous functions and does not support asynchronous functions.
 
 ```typescript
 import { BaseState, IProvider } from "@sovgut/state";
