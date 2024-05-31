@@ -7,15 +7,15 @@ export class BaseState {
   private static observer = new EventEmitter()
   public static provider: IProvider | undefined = undefined;
 
-  public static on(event: string, callback: (data: IProviderEvent) => void): void {
+  public static on<Value>(event: string, callback: (data: IProviderEvent<Value>) => void): void {
     this.observer.on(event, callback);
   }
 
-  public static once(event: string, callback: (data: IProviderEvent) => void): void {
+  public static once<Value>(event: string, callback: (data: IProviderEvent<Value>) => void): void {
     this.observer.once(event, callback);
   }
 
-  public static off(event: string, callback: (data: IProviderEvent) => void): void {
+  public static off<Value>(event: string, callback: (data: IProviderEvent<Value>) => void): void {
     this.observer.off(event, callback);
   }
 
