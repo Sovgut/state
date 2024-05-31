@@ -217,7 +217,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-This README provides a comprehensive overview of the `@sovgut/state` package, including installation, usage examples, and information on contributing.
