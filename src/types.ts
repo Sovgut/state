@@ -49,7 +49,7 @@ export interface IProvider {
   has?(key: string): boolean;
 }
 
-export interface IProviderEvent {
+export interface IProviderEvent<Value = unknown> {
   /**
    * The key of the item in the state that triggered the event.
    */
@@ -59,7 +59,7 @@ export interface IProviderEvent {
    * The value associated with the key in the state.
    * This is optional and can be of any type.
    */
-  value?: unknown;
+  value?: Value;
   
   /**
    * The provider type indicating the source of the state change.
