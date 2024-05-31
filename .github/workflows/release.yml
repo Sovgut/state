@@ -41,6 +41,7 @@ jobs:
           else
             echo "version_changed=false" >> $GITHUB_ENV
             echo "version_changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Output version_changed
         run: |
