@@ -187,7 +187,7 @@ class CustomProvider implements IProvider {
 
 class CustomState extends BaseState {
   static {
-    CustomState.type = "CustomProvider"
+    CustomState.type = "CustomState"
     CustomState.provider = new CustomProvider();
   }
 }
