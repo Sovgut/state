@@ -1,6 +1,6 @@
 {
   "name": "@sovgut/state",
-  "version": "1.0.44",
+  "version": "1.1.0",
   "type": "module",
   "repository": "https://github.com/Sovgut/state.git",
   "author": {
@@ -22,7 +22,6 @@
     "data storage",
     "frontend",
     "web development",
-    "custom storage providers",
     "synchronous storage",
     "lightweight",
     "flexible state management"
