@@ -35,6 +35,8 @@ jobs:
       - name: Check version increment
         id: check_version
         run: |
+          echo "Previous version: $PREV_VERSION"
+          echo "Current version: $CURR_VERSION"
           if [ "$PREV_VERSION" = "none" ] || [ "$PREV_VERSION" != "$CURR_VERSION" ]; then
             echo "version_changed=true" >> $GITHUB_ENV
             echo "version_changed=true" >> $GITHUB_OUTPUT
