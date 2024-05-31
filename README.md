@@ -42,7 +42,7 @@ import { LocalState, SessionState, MemoryState, CookieState } from "@sovgut/stat
 Create a React component that uses the state and listens for changes using the observer mode.
 
 ```tsx
-import { IProviderEvent, LocalState } from "@sovgut/state";
+import { type IProviderEvent, LocalState } from "@sovgut/state";
 import { memo, useCallback, useEffect, useState } from "react";
 
 export const App: React.FC = memo(() => {
