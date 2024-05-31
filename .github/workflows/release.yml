@@ -35,9 +35,9 @@ jobs:
       - name: Check version increment
         id: check_version
         run: |
-          echo "Previous version: ${{ steps.get_previous_version.outputs.version_changed }}"
-          echo "Current version: ${{ steps.get_current_version.outputs.version_changed }}"
-          if [ "$PREV_VERSION" = "none" ] || [ "${{ steps.get_current_version.outputs.version_changed }}" != "${{ steps.get_previous_version.outputs.version_changed }}" ]; then
+          echo "Previous version: ${{ steps.get_previous_version.outputs.prev_version }}"
+          echo "Current version: ${{ steps.get_current_version.outputs.curr_version }}"
+          if [ "$PREV_VERSION" = "none" ] || [ "${{ steps.get_current_version.outputs.curr_version }}" != "${{ steps.get_previous_version.outputs.prev_version }}" ]; then
             echo "version_changed=true" >> $GITHUB_OUTPUT
           else
             echo "version_changed=false" >> $GITHUB_OUTPUT
