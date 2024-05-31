@@ -42,7 +42,7 @@ import { LocalState, SessionState, MemoryState, CookieState } from "@sovgut/stat
 Create a React component that uses the state and listens for changes using the observer mode.
 
 ```tsx
-import { type IProviderEvent, LocalState } from "@sovgut/state";
+import { type IStrategyEvent, LocalState } from "@sovgut/state";
 import { memo, useCallback, useEffect, useState } from "react";
 
 export const App: React.FC = memo(() => {
@@ -50,7 +50,7 @@ export const App: React.FC = memo(() => {
     LocalState.get("random-number-key", { fallback: Math.random() })
   );
 
-  const handleUpdateEvent = useCallback((event: IProviderEvent<number>) => {
+  const handleUpdateEvent = useCallback((event: IStrategyEvent<number>) => {
     if (event.value) {
         setValue(event.value)
     }
@@ -169,8 +169,8 @@ You can listen for changes to the state using the observer mode:
 ### Adding Event Listeners
 
 ```typescript
-function onLocalStateChange(event: IProviderEvent) {
-  console.log(`${event.key} changed in ${event.provider} provider`, event.value);
+function onLocalStateChange(event: IStrategyEvent) {
+  console.log(`${event.key} changed in ${event.strategy} strategy`, event.value);
 }
 
 LocalState.on("key-1", onLocalStateChange);
@@ -193,38 +193,45 @@ LocalState.removeAllListeners();
 
 ### Event Data
 
-The event object contains the key, value, and provider of change:
+The event object contains the key, value, and strategy of change:
 
 ```typescript
-interface IProviderEvent<Value = unknown> {
+export type IStrategy =
+  | "local"
+  | "session"
+  | "cookie"
+  | "memory"
+  | (string & NonNullable<unknown>);
+
+export interface IStrategyEvent<Value = unknown> {
   /**
    * The key of the item in the state that triggered the event.
    */
   key: string;
-  
+
   /**
    * The value associated with the key in the state.
    * This is optional and can be of any type.
    */
   value?: Value;
-  
+
   /**
-   * The provider type indicating the source of the state change.
+   * The strategy type indicating the source of the state change.
    * This will typically be one of the predefined types (local, session, cookie, memory),
-   * or a custom provider type as a string.
+   * or a custom strategy type as a string.
    */
-  provider: 'local' | 'session' | 'cookie' | 'memory' | string & NonNullable<unknown>;
+  strategy: IStrategy;
 }
 ```
 
-## Extending to Custom Providers
+## Extending to Custom Strategies
 
-You can extend the `BaseState` class to support custom storage providers by implementing the `IProvider` interface. Note that `CustomState` only supports synchronous functions and does not support asynchronous functions.
+You can extend the `BaseState` class to support custom storage by implementing the `IStrategyStorage` interface. Note that `CustomState` only supports synchronous functions and does not support asynchronous functions.
 
 ```typescript
-import { BaseState, IProvider } from "@sovgut/state";
+import { BaseState, type IStrategyStorage } from "@sovgut/state";
 
-class MyCustomProvider implements IProvider {
+class MyCustomStrategy implements IStrategyStorage {
   private storage = new Map<string, string>();
 
   getItem(key: string) {
@@ -250,8 +257,8 @@ class MyCustomProvider implements IProvider {
 
 class MyCustomState extends BaseState {
   static {
-    MyCustomState.type = "my-custom-state"
-    MyCustomState.provider = new MyCustomProvider();
+    MyCustomState.strategy = "my-custom-state"
+    MyCustomState.storage = new MyCustomStrategy();
   }
 }
 

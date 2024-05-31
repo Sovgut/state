@@ -4,8 +4,8 @@ export class MemoryState extends BaseState {
   static {
     const instance = new Map();
 
-    MemoryState.type = "memory"
-    MemoryState.provider = {
+    MemoryState.strategy = "memory"
+    MemoryState.storage = {
       getItem(key: string) {
         const value = instance.get(key);
 

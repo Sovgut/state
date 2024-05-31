@@ -14,7 +14,7 @@ describe(CookieState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "cookie",
+      strategy: "cookie",
     });
   });
 
@@ -32,7 +32,7 @@ describe(CookieState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "cookie",
+      strategy: "cookie",
     });
   });
 
@@ -61,7 +61,7 @@ describe(CookieState.name, () => {
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
-      provider: "cookie",
+      strategy: "cookie",
     });
   });
 

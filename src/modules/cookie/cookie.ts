@@ -2,8 +2,8 @@ import { BaseState } from "../base/base";
 
 export class CookieState extends BaseState {
   static {
-    CookieState.type = "cookie"
-    CookieState.provider = {
+    CookieState.strategy = "cookie"
+    CookieState.storage = {
       getItem(key: string) {
         const name = key + "=";
         const decodedCookie = decodeURIComponent(document.cookie);

@@ -14,7 +14,7 @@ describe(SessionState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "session",
+      strategy: "session",
     });
   });
 
@@ -32,7 +32,7 @@ describe(SessionState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "session",
+      strategy: "session",
     });
   });
 
@@ -61,7 +61,7 @@ describe(SessionState.name, () => {
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
-      provider: "session",
+      strategy: "session",
     });
   });
 

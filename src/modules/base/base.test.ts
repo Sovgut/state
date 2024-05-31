@@ -2,12 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { BaseState } from "./base";
 import { UnsupportedException } from "@/errors/unsupported/unsupported";
 
-afterEach(() => (BaseState.provider = undefined));
+afterEach(() => (BaseState.storage = undefined));
 
 describe(BaseState.name, () => {
   it("should trigger event when a key is set", () => {
     BaseState.removeAllListeners();
-    BaseState.provider = localStorage;
+    BaseState.storage = localStorage;
     BaseState.clear();
 
     const callback = vi.fn();
@@ -18,13 +18,13 @@ describe(BaseState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "base",
+      strategy: "base",
     });
   });
 
   it("should trigger event once when a key is set with once", () => {
     BaseState.removeAllListeners();
-    BaseState.provider = localStorage;
+    BaseState.storage = localStorage;
     BaseState.clear();
 
     const callback = vi.fn();
@@ -37,13 +37,13 @@ describe(BaseState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "base",
+      strategy: "base",
     });
   });
 
   it("should not trigger event after it is removed", () => {
     BaseState.removeAllListeners();
-    BaseState.provider = localStorage;
+    BaseState.storage = localStorage;
     BaseState.clear();
 
     const callback = vi.fn();
@@ -57,7 +57,7 @@ describe(BaseState.name, () => {
 
   it("should trigger event when a key is unset", () => {
     BaseState.removeAllListeners();
-    BaseState.provider = localStorage;
+    BaseState.storage = localStorage;
     BaseState.clear();
 
     const callback = vi.fn();
@@ -68,7 +68,7 @@ describe(BaseState.name, () => {
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
-      provider: "base",
+      strategy: "base",
     });
   });
 
@@ -76,15 +76,15 @@ describe(BaseState.name, () => {
     expect.assertions(2);
 
     expect(() => BaseState.set("test", 1)).toThrowError(
-      new UnsupportedException("provider")
+      new UnsupportedException("storage")
     );
     expect(() => BaseState.get("test")).toThrowError(
-      new UnsupportedException("provider")
+      new UnsupportedException("storage")
     );
   });
 
-  it("Read data from provider", () => {
-    BaseState.provider = localStorage;
+  it("Read data from storage", () => {
+    BaseState.storage = localStorage;
 
     expect(BaseState.get("test", { fallback: "test" })).toBe("test");
   });
@@ -93,7 +93,7 @@ describe(BaseState.name, () => {
     expect.assertions(1);
 
     expect(() => BaseState.unset("test")).toThrowError(
-      new UnsupportedException("provider")
+      new UnsupportedException("storage")
     );
   });
 
@@ -101,7 +101,7 @@ describe(BaseState.name, () => {
     expect.assertions(1);
 
     expect(() => BaseState.clear()).toThrowError(
-      new UnsupportedException("provider")
+      new UnsupportedException("storage")
     );
   });
 
@@ -109,7 +109,7 @@ describe(BaseState.name, () => {
     expect.assertions(1);
 
     expect(() => BaseState.has("test")).toThrowError(
-      new UnsupportedException("provider")
+      new UnsupportedException("storage")
     );
   });
 });

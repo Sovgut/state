@@ -1,21 +1,30 @@
 import { UnsupportedException } from "@/errors/unsupported/unsupported";
-import { ISupportedPrimitive, IProvider, IProviderEvent } from "@/types";
+import { ISupportedPrimitive, IStrategyStorage, IStrategyEvent } from "@/types";
 import EventEmitter from "eventemitter3";
 
 export class BaseState {
-  protected static type = "base";
-  private static observer = new EventEmitter()
-  public static provider: IProvider | undefined = undefined;
+  protected static strategy = "base";
+  private static observer = new EventEmitter();
+  public static storage: IStrategyStorage | undefined;
 
-  public static on<Value>(event: string, callback: (data: IProviderEvent<Value>) => void): void {
+  public static on<Value>(
+    event: string,
+    callback: (data: IStrategyEvent<Value>) => void
+  ): void {
     this.observer.on(event, callback);
   }
 
-  public static once<Value>(event: string, callback: (data: IProviderEvent<Value>) => void): void {
+  public static once<Value>(
+    event: string,
+    callback: (data: IStrategyEvent<Value>) => void
+  ): void {
     this.observer.once(event, callback);
   }
 
-  public static off<Value>(event: string, callback: (data: IProviderEvent<Value>) => void): void {
+  public static off<Value>(
+    event: string,
+    callback: (data: IStrategyEvent<Value>) => void
+  ): void {
     this.observer.off(event, callback);
   }
 
@@ -27,11 +36,11 @@ export class BaseState {
     key: string,
     options?: { fallback?: T; cast?: ISupportedPrimitive }
   ): T {
-    if (typeof this.provider === "undefined") {
-      throw new UnsupportedException("provider");
+    if (typeof this.storage === "undefined") {
+      throw new UnsupportedException("storage");
     }
 
-    const raw: string | null | undefined = this.provider.getItem(key);
+    const raw: string | null | undefined = this.storage.getItem(key);
     if (raw === null) {
       return options?.fallback as T;
     }
@@ -60,65 +69,65 @@ export class BaseState {
   }
 
   public static set(key: string, value: unknown): void {
-    if (typeof this.provider === "undefined") {
-      throw new UnsupportedException("provider");
+    if (typeof this.storage === "undefined") {
+      throw new UnsupportedException("storage");
     }
 
     switch (typeof value) {
       case "bigint": {
-        this.provider.setItem(key, value.toString());
-        this.observer.emit(key, {  key, value, provider: this.type });
+        this.storage.setItem(key, value.toString());
+        this.observer.emit(key, { key, value, strategy: this.strategy });
         break;
       }
       case "boolean": {
-        this.provider.setItem(key, String(value));
-        this.observer.emit(key, {  key, value, provider: this.type });
-        break; 
+        this.storage.setItem(key, String(value));
+        this.observer.emit(key, { key, value, strategy: this.strategy });
+        break;
       }
       case "number": {
-        this.provider.setItem(key, String(value));
-        this.observer.emit(key, {  key, value, provider: this.type });
-        break; 
+        this.storage.setItem(key, String(value));
+        this.observer.emit(key, { key, value, strategy: this.strategy });
+        break;
       }
       case "object": {
-        this.provider.setItem(key, JSON.stringify(value));
-        this.observer.emit(key, {  key, value, provider: this.type });
-        break; 
+        this.storage.setItem(key, JSON.stringify(value));
+        this.observer.emit(key, { key, value, strategy: this.strategy });
+        break;
       }
       case "string": {
-        this.provider.setItem(key, value);
-        this.observer.emit(key, {  key, value, provider: this.type });
-        break; 
+        this.storage.setItem(key, value);
+        this.observer.emit(key, { key, value, strategy: this.strategy });
+        break;
       }
     }
   }
 
   public static unset(key: string): void {
-    if (typeof this.provider === "undefined") {
-      throw new UnsupportedException("provider");
+    if (typeof this.storage === "undefined") {
+      throw new UnsupportedException("storage");
     }
 
-    this.provider.removeItem(key);
-    this.observer.emit(key, {  key, provider: this.type });
+    this.storage.removeItem(key);
+    this.observer.emit(key, { key, strategy: this.strategy });
   }
 
   public static clear(): void {
-    if (typeof this.provider === "undefined") {
-      throw new UnsupportedException("provider");
+    if (typeof this.storage === "undefined") {
+      throw new UnsupportedException("storage");
     }
 
-    this.provider.clear();
+    this.storage.clear();
   }
 
   public static has(key: string): boolean {
-    if (typeof this.provider === "undefined") {
-      throw new UnsupportedException("provider");
+    if (typeof this.storage === "undefined") {
+      throw new UnsupportedException("storage");
     }
 
-    if (typeof this.provider.has !== "undefined") {
-      return this.provider.has(key);
+    if (typeof this.storage.has !== "undefined") {
+      return this.storage.has(key);
     }
 
-    return !!this.provider.getItem(key);
+    return !!this.storage.getItem(key);
   }
 }

@@ -14,7 +14,7 @@ describe(LocalState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "local",
+      strategy: "local",
     });
   });
 
@@ -32,7 +32,7 @@ describe(LocalState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "local",
+      strategy: "local",
     });
   });
 
@@ -61,7 +61,7 @@ describe(LocalState.name, () => {
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
-      provider: "local",
+      strategy: "local",
     });
   });
 

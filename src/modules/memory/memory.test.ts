@@ -14,7 +14,7 @@ describe(MemoryState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "memory",
+      strategy: "memory",
     });
   });
 
@@ -32,7 +32,7 @@ describe(MemoryState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "memory",
+      strategy: "memory",
     });
   });
 
@@ -61,7 +61,7 @@ describe(MemoryState.name, () => {
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
-      provider: "memory",
+      strategy: "memory",
     });
   });
 

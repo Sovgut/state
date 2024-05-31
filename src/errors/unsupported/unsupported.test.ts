@@ -5,8 +5,8 @@ describe(UnsupportedException.name, () => {
   it("Should throw exception with message", () => {
     expect.assertions(2);
     expect(() => {
-      throw new UnsupportedException("provider");
-    }).toThrowError(new UnsupportedException("provider"));
+      throw new UnsupportedException("storage");
+    }).toThrowError(new UnsupportedException("storage"));
     expect(() => {
       throw new UnsupportedException("type");
     }).toThrowError(new UnsupportedException("type"));
