@@ -120,7 +120,7 @@ LocalState.get("key-2", { fallback: 2 }); // 1
 LocalState.get("key-3", { fallback: "bar" }); // "foo"
 LocalState.get("key-4", { fallback: false }); // true
 LocalState.get("key-5", { fallback: { foo: "bar" } }); // {}
-LocalState.get("key-6", { fallback: [{ foo: "bar" }, { foo: "bar" }, { foo: "bar" }] }); // []
+LocalState.get("key-6", { fallback: [{ foo: "bar" }, { foo: "bar" }] }); // []
 ```
 
 ### Removing Values
