@@ -1,7 +1,70 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { SessionState } from "./session";
 
 describe(SessionState.name, () => {
+  it("should trigger event when a key is set", () => {
+    SessionState.removeAllListeners();
+    SessionState.clear();
+
+    const callback = vi.fn();
+    SessionState.on("test-key", callback);
+
+    SessionState.set("test-key", "test-value");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "session",
+    });
+  });
+
+  it("should trigger event once when a key is set with once", () => {
+    SessionState.removeAllListeners();
+    SessionState.clear();
+
+    const callback = vi.fn();
+    SessionState.once("test-key", callback);
+
+    SessionState.set("test-key", "test-value");
+    SessionState.set("test-key", "another-value");
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "session",
+    });
+  });
+
+  it("should not trigger event after it is removed", () => {
+    SessionState.removeAllListeners();
+    SessionState.clear();
+
+    const callback = vi.fn();
+    SessionState.on("test-key", callback);
+    SessionState.off("test-key", callback);
+
+    SessionState.set("test-key", "test-value");
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("should trigger event when a key is unset", () => {
+    SessionState.removeAllListeners();
+    SessionState.clear();
+
+    const callback = vi.fn();
+    SessionState.on("test-key", callback);
+
+    SessionState.set("test-key", "test-value");
+    SessionState.unset("test-key");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      provider: "session",
+    });
+  });
+
   it("Write and read data", () => {
     SessionState.set("test-1", 1n);
     SessionState.set("test-2", 1);

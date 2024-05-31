@@ -121,7 +121,7 @@ You can listen for changes to the state using the observer mode:
 
 ```typescript
 function onLocalStateChange(event: IProviderEvent) {
-  console.log(`${event.key} changed in ${event.provider}`, event.value);
+  console.log(`${event.key} changed in ${event.provider} provider`, event.value);
 }
 
 LocalState.on("key-1", onLocalStateChange);
@@ -147,10 +147,24 @@ LocalState.removeAllListeners();
 The event object contains the key, value, and provider of change:
 
 ```typescript
-{
+export interface IProviderEvent {
+  /**
+   * The key of the item in the state that triggered the event.
+   */
   key: string;
+  
+  /**
+   * The value associated with the key in the state.
+   * This is optional and can be of any type.
+   */
   value?: unknown;
-  provider: string;
+  
+  /**
+   * The provider type indicating the source of the state change.
+   * This will typically be one of the predefined types (local, session, cookie, memory),
+   * or a custom provider type as a string.
+   */
+  provider: 'local' | 'session' | 'cookie' | 'memory' | string & NonNullable<unknown>;
 }
 ```
 
@@ -161,7 +175,7 @@ You can extend the `BaseState` class to support custom storage providers by impl
 ```typescript
 import { BaseState, IProvider } from "@sovgut/state";
 
-class CustomProvider implements IProvider {
+class MyCustomProvider implements IProvider {
   private storage = new Map<string, string>();
 
   getItem(key: string) {
@@ -185,15 +199,15 @@ class CustomProvider implements IProvider {
   }
 }
 
-class CustomState extends BaseState {
+class MyCustomState extends BaseState {
   static {
-    CustomState.type = "CustomState"
-    CustomState.provider = new CustomProvider();
+    MyCustomState.type = "my-custom-state"
+    MyCustomState.provider = new MyCustomProvider();
   }
 }
 
-CustomState.set("key", "value");
-const customValue = CustomState.get("key");
+MyCustomState.set("key", "value");
+const customValue = MyCustomState.get("key");
 ```
 
 ## Contributing

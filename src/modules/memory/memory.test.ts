@@ -1,7 +1,70 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { MemoryState } from "./memory";
 
 describe(MemoryState.name, () => {
+  it("should trigger event when a key is set", () => {
+    MemoryState.removeAllListeners();
+    MemoryState.clear();
+
+    const callback = vi.fn();
+    MemoryState.on("test-key", callback);
+
+    MemoryState.set("test-key", "test-value");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "memory",
+    });
+  });
+
+  it("should trigger event once when a key is set with once", () => {
+    MemoryState.removeAllListeners();
+    MemoryState.clear();
+
+    const callback = vi.fn();
+    MemoryState.once("test-key", callback);
+
+    MemoryState.set("test-key", "test-value");
+    MemoryState.set("test-key", "another-value");
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "memory",
+    });
+  });
+
+  it("should not trigger event after it is removed", () => {
+    MemoryState.removeAllListeners();
+    MemoryState.clear();
+
+    const callback = vi.fn();
+    MemoryState.on("test-key", callback);
+    MemoryState.off("test-key", callback);
+
+    MemoryState.set("test-key", "test-value");
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("should trigger event when a key is unset", () => {
+    MemoryState.removeAllListeners();
+    MemoryState.clear();
+
+    const callback = vi.fn();
+    MemoryState.on("test-key", callback);
+
+    MemoryState.set("test-key", "test-value");
+    MemoryState.unset("test-key");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      provider: "memory",
+    });
+  });
+
   it("Write and read data", () => {
     MemoryState.set("test-1", 1n);
     MemoryState.set("test-2", 1);

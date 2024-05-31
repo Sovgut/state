@@ -1,7 +1,70 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { LocalState } from "./local";
 
 describe(LocalState.name, () => {
+  it("should trigger event when a key is set", () => {
+    LocalState.removeAllListeners();
+    LocalState.clear();
+
+    const callback = vi.fn();
+    LocalState.on("test-key", callback);
+
+    LocalState.set("test-key", "test-value");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "local",
+    });
+  });
+
+  it("should trigger event once when a key is set with once", () => {
+    LocalState.removeAllListeners();
+    LocalState.clear();
+
+    const callback = vi.fn();
+    LocalState.once("test-key", callback);
+
+    LocalState.set("test-key", "test-value");
+    LocalState.set("test-key", "another-value");
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "local",
+    });
+  });
+
+  it("should not trigger event after it is removed", () => {
+    LocalState.removeAllListeners();
+    LocalState.clear();
+
+    const callback = vi.fn();
+    LocalState.on("test-key", callback);
+    LocalState.off("test-key", callback);
+
+    LocalState.set("test-key", "test-value");
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("should trigger event when a key is unset", () => {
+    LocalState.removeAllListeners();
+    LocalState.clear();
+
+    const callback = vi.fn();
+    LocalState.on("test-key", callback);
+
+    LocalState.set("test-key", "test-value");
+    LocalState.unset("test-key");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      provider: "local",
+    });
+  });
+
   it("Write and read data", () => {
     LocalState.set("test-1", 1n);
     LocalState.set("test-2", 1);

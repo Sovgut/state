@@ -2,7 +2,7 @@ import { BaseState } from "../base/base";
 
 export class CookieState extends BaseState {
   static {
-    CookieState.type = "CookieState"
+    CookieState.type = "cookie"
     CookieState.provider = {
       getItem(key: string) {
         const name = key + "=";

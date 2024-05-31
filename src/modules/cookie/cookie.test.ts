@@ -1,7 +1,70 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { CookieState } from "./cookie";
 
 describe(CookieState.name, () => {
+  it("should trigger event when a key is set", () => {
+    CookieState.removeAllListeners();
+    CookieState.clear();
+
+    const callback = vi.fn();
+    CookieState.on("test-key", callback);
+
+    CookieState.set("test-key", "test-value");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "cookie",
+    });
+  });
+
+  it("should trigger event once when a key is set with once", () => {
+    CookieState.removeAllListeners();
+    CookieState.clear();
+
+    const callback = vi.fn();
+    CookieState.once("test-key", callback);
+
+    CookieState.set("test-key", "test-value");
+    CookieState.set("test-key", "another-value");
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      value: "test-value",
+      provider: "cookie",
+    });
+  });
+
+  it("should not trigger event after it is removed", () => {
+    CookieState.removeAllListeners();
+    CookieState.clear();
+
+    const callback = vi.fn();
+    CookieState.on("test-key", callback);
+    CookieState.off("test-key", callback);
+
+    CookieState.set("test-key", "test-value");
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("should trigger event when a key is unset", () => {
+    CookieState.removeAllListeners();
+    CookieState.clear();
+
+    const callback = vi.fn();
+    CookieState.on("test-key", callback);
+
+    CookieState.set("test-key", "test-value");
+    CookieState.unset("test-key");
+
+    expect(callback).toHaveBeenCalledWith({
+      key: "test-key",
+      provider: "cookie",
+    });
+  });
+
   it("Write and read data", () => {
     CookieState.set("test-1", 1n);
     CookieState.set("test-2", 1);

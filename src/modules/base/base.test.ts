@@ -18,7 +18,7 @@ describe(BaseState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "BaseState",
+      provider: "base",
     });
   });
 
@@ -37,7 +37,7 @@ describe(BaseState.name, () => {
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
       value: "test-value",
-      provider: "BaseState",
+      provider: "base",
     });
   });
 
@@ -68,7 +68,7 @@ describe(BaseState.name, () => {
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
-      provider: "BaseState",
+      provider: "base",
     });
   });
 

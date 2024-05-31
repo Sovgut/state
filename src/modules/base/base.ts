@@ -3,7 +3,7 @@ import { ISupportedPrimitive, IProvider, IProviderEvent } from "@/types";
 import EventEmitter from "eventemitter3";
 
 export class BaseState {
-  protected static type = "BaseState";
+  protected static type = "base";
   private static observer = new EventEmitter()
   public static provider: IProvider | undefined = undefined;
 
@@ -32,7 +32,7 @@ export class BaseState {
     }
 
     const raw: string | null | undefined = this.provider.getItem(key);
-    if (raw === null || typeof raw === "undefined") {
+    if (raw === null) {
       return options?.fallback as T;
     }
 

@@ -4,10 +4,16 @@ export class MemoryState extends BaseState {
   static {
     const instance = new Map();
 
-    MemoryState.type = "MemoryState"
+    MemoryState.type = "memory"
     MemoryState.provider = {
       getItem(key: string) {
-        return instance.get(key);
+        const value = instance.get(key);
+
+        if (typeof value === 'undefined') {
+          return null;
+        }
+
+        return value
       },
       setItem(key: string, value: string) {
         instance.set(key, value);
