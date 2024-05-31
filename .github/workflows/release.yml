@@ -18,28 +18,29 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Debug current and previous versions
+      - name: Get current version from package.json
+        id: get_current_version
         run: |
-          echo "Current version in package.json: $(jq -r .version < package.json)"
-          PREV_VERSION=$(git show HEAD~1:package.json | jq -r .version || echo "none")
+          CURR_VERSION=$(grep '"version":' package.json | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Current version in package.json: $CURR_VERSION"
+          echo "curr_version=$CURR_VERSION" >> $GITHUB_ENV
+
+      - name: Get previous version from package.json
+        id: get_previous_version
+        run: |
+          PREV_VERSION=$(git show HEAD~1:package.json | grep '"version":' | sed -E 's/.*"([^"]+)".*/\1/' || echo "none")
           echo "Previous version in package.json: $PREV_VERSION"
+          echo "prev_version=$PREV_VERSION" >> $GITHUB_ENV
 
       - name: Check version increment
         id: check_version
         run: |
-          PREV_VERSION=$(git show HEAD~1:package.json | jq -r .version || echo "none")
-          CURR_VERSION=$(jq -r .version < package.json)
-          echo "Previous version: $PREV_VERSION"
-          echo "Current version: $CURR_VERSION"
           if [ "$PREV_VERSION" = "none" ] || [ "$PREV_VERSION" != "$CURR_VERSION" ]; then
             echo "version_changed=true" >> $GITHUB_ENV
             echo "version_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "version_changed=true" >> $GITHUB_ENV
-            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "version_changed=false" >> $GITHUB_ENV
+            echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
   install-dependencies:
@@ -53,18 +54,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts
+          cache: "npm"
 
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
-        
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
+        run: npm install
 
   test:
     runs-on: ubuntu-latest
@@ -76,18 +69,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts
+          cache: "npm"
 
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
-        
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
+        run: npm install
 
       - name: Test codebase
         run: npm run test
@@ -102,18 +87,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts
+          cache: "npm"
 
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
-          
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
+        run: npm install
 
       - name: Building codebase
         run: npm run build
