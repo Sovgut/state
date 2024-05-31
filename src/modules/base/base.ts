@@ -1,5 +1,9 @@
 import { UnsupportedException } from "@/errors/unsupported/unsupported";
-import { ISupportedPrimitive, IStrategyStorage, IStrategyEvent } from "@/types";
+import type {
+  IStrategyStorage,
+  IStrategyEvent,
+  IStrategyOptions,
+} from "@/types";
 import EventEmitter from "eventemitter3";
 
 export class BaseState {
@@ -32,38 +36,38 @@ export class BaseState {
     this.observer.removeAllListeners();
   }
 
-  public static get<T = unknown>(
+  public static get<Fallback = unknown>(
     key: string,
-    options?: { fallback?: T; cast?: ISupportedPrimitive }
-  ): T {
+    options?: IStrategyOptions<Fallback>
+  ): Fallback {
     if (typeof this.storage === "undefined") {
       throw new UnsupportedException("storage");
     }
 
     const raw: string | null | undefined = this.storage.getItem(key);
     if (raw === null) {
-      return options?.fallback as T;
+      return options?.fallback as Fallback;
     }
 
     const type = options?.cast ?? typeof options?.fallback;
     switch (type) {
       case "bigint": {
-        return BigInt(raw) as T;
+        return BigInt(raw) as Fallback;
       }
       case "boolean": {
-        return (raw.toLowerCase() === ("true" as unknown)) as T;
+        return (raw.toLowerCase() === ("true" as unknown)) as Fallback;
       }
       case "number": {
-        return Number(raw) as T;
+        return Number(raw) as Fallback;
       }
       case "object": {
-        return JSON.parse(raw) as T;
+        return JSON.parse(raw) as Fallback;
       }
       case "string": {
-        return raw as T;
+        return raw as Fallback;
       }
       default: {
-        return raw as T;
+        return raw as Fallback;
       }
     }
   }

@@ -10,6 +10,11 @@ export type ISupportedPrimitive =
   | "object"
   | "string";
 
+export interface IStrategyOptions<Fallback = unknown> {
+  fallback?: Fallback; 
+  cast?: ISupportedPrimitive
+}
+
 export interface IStrategyStorage {
   /**
    * Retrieves the value associated with the specified key.

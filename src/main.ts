@@ -9,6 +9,7 @@ export { UnsupportedException } from "./errors/unsupported/unsupported";
 export type {
   IStrategyStorage,
   IStrategyEvent,
+  IStrategyOptions,
   IStrategy,
   ISupportedPrimitive,
 } from "./types";
