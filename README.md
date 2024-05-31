@@ -77,12 +77,12 @@ export const App: React.FC = memo(() => {
 You can store different types of values in the state:
 
 ```typescript
-LocalState.set("key-1", 1n);         // BigInt
-LocalState.set("key-2", 1);          // Number
-LocalState.set("key-3", "foo");      // String
-LocalState.set("key-4", true);       // Boolean
-LocalState.set("key-5", {});         // Object
-LocalState.set("key-6", []);         // Array
+LocalState.set("key-1", 1n); // BigInt
+LocalState.set("key-2", 1); // Number
+LocalState.set("key-3", "foo"); // String
+LocalState.set("key-4", true); // Boolean
+LocalState.set("key-5", {}); // Object
+LocalState.set("key-6", []); // Array
 ```
 
 ### Getting Values
@@ -90,23 +90,37 @@ LocalState.set("key-6", []);         // Array
 You can retrieve values from the state with optional type casting:
 
 ```typescript
-const value1 = LocalState.get("key-1", { cast: "bigint" });    // 1n
-const value2 = LocalState.get("key-2", { cast: "number" });    // 1
-const value3 = LocalState.get("key-3", { cast: "string" });    // "foo"
-const value4 = LocalState.get("key-4", { cast: "boolean" });   // true
-const value5 = LocalState.get("key-5", { cast: "object" });    // {}
-const value6 = LocalState.get("key-6", { cast: "object" });    // []
+LocalState.get("key-1", { cast: "bigint" }); // 1n
+LocalState.get("key-2", { cast: "number" }); // 1
+LocalState.get("key-3", { cast: "string" }); // "foo"
+LocalState.get("key-4", { cast: "boolean" }); // true
+LocalState.get("key-5", { cast: "object" }); // {}
+LocalState.get("key-6", { cast: "object" }); // []
 ```
 
-You can also provide fallback values:
+You can also provide fallback values, which not only supply a default value if the key does not exist, but also define the type to cast the retrieved value:
 
 ```typescript
-const value7 = LocalState.get("nonexistent-key", { fallback: 1n });    // 1n
-const value8 = LocalState.get("nonexistent-key", { fallback: 1 });     // 1
-const value9 = LocalState.get("nonexistent-key", { fallback: "foo" }); // "foo"
-const value10 = LocalState.get("nonexistent-key", { fallback: true }); // true
-const value11 = LocalState.get("nonexistent-key", { fallback: {} });   // {}
-const value12 = LocalState.get("nonexistent-key", { fallback: [] });   // []
+LocalState.get("nonexistent-key", { fallback: 1n }); // 1n
+LocalState.get("nonexistent-key", { fallback: 1 }); // 1
+LocalState.get("nonexistent-key", { fallback: "foo" }); // "foo"
+LocalState.get("nonexistent-key", { fallback: true }); // true
+LocalState.get("nonexistent-key", { fallback: {} }); // {}
+LocalState.get("nonexistent-key", { fallback: [] }); // []
+
+LocalState.set("key-1", 1n);
+LocalState.set("key-2", 1);
+LocalState.set("key-3", "foo");
+LocalState.set("key-4", true);
+LocalState.set("key-5", {});
+LocalState.set("key-6", []);
+
+LocalState.get("key-1", { fallback: 2n }); // 1n
+LocalState.get("key-2", { fallback: 2 }); // 1
+LocalState.get("key-3", { fallback: "bar" }); // "foo"
+LocalState.get("key-4", { fallback: false }); // true
+LocalState.get("key-5", { fallback: { foo: "bar" } }); // {}
+LocalState.get("key-6", { fallback: [{ foo: "bar" }, { foo: "bar" }, { foo: "bar" }] }); // []
 ```
 
 ### Removing Values
@@ -130,7 +144,7 @@ LocalState.clear();
 You can check if a key exists in the state:
 
 ```typescript
-const exists = LocalState.has("key-1"); // true or false
+LocalState.has("key-1"); // true or false
 ```
 
 ## Using Other Storage Mechanisms
