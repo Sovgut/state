@@ -32,15 +32,15 @@
     "build": "tsc && vite build"
   },
   "devDependencies": {
-    "@types/node": "^20.12.13",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@types/node": "^20.14.10",
+    "@vitest/coverage-v8": "^2.0.1",
     "eventemitter3": "^5.0.1",
     "jsdom": "^24.1.0",
-    "terser": "^5.31.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0",
+    "terser": "^5.31.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3",
     "vite-plugin-dts": "^3.9.1",
-    "vitest": "^1.6.0"
+    "vitest": "^2.0.1"
   },
   "files": [
     "dist"
