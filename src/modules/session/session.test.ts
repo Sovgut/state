@@ -159,12 +159,8 @@ describe(SessionState.name, () => {
     expect(SessionState.getItem("test-2", { cast: "number" })).toBe(1);
     expect(SessionState.getItem("test-3", { cast: "string" })).toBe("foo");
     expect(SessionState.getItem("test-4", { cast: "boolean" })).toBe(true);
-    expect(SessionState.getItem("test-5", { cast: "object" })).toStrictEqual(
-      {},
-    );
-    expect(SessionState.getItem("test-6", { cast: "object" })).toStrictEqual(
-      [],
-    );
+    expect(SessionState.getItem("test-5", { cast: "object" })).toStrictEqual({});
+    expect(SessionState.getItem("test-6", { cast: "object" })).toStrictEqual([]);
 
     expect(SessionState.getItem("test-7", { fallback: 1n })).toBe(1n);
     expect(SessionState.getItem("test-8", { fallback: 1 })).toBe(1);
