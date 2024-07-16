@@ -3,63 +3,14 @@
  * This type is used to specify the expected data type
  * for casting values retrieved from the state.
  */
-export type ISupportedPrimitive =
-  | "bigint"
-  | "boolean"
-  | "number"
-  | "object"
-  | "string";
+export type ISupportedPrimitive = "bigint" | "boolean" | "number" | "object" | "string";
 
 export interface IStrategyOptions<Fallback = unknown> {
-  fallback?: Fallback; 
-  cast?: ISupportedPrimitive
+  fallback?: Fallback;
+  cast?: ISupportedPrimitive;
 }
 
-export interface IStrategyStorage {
-  /**
-   * Retrieves the value associated with the specified key.
-   *
-   * @param key - The key of the item to retrieve.
-   * @returns The value associated with the key, or null if not found.
-   */
-  getItem(key: string): string | null;
-
-  /**
-   * Stores a value with the specified key.
-   *
-   * @param key - The key to associate with the value.
-   * @param value - The value to store.
-   */
-  setItem(key: string, value: unknown): void;
-
-  /**
-   * Removes the item associated with the specified key.
-   *
-   * @param key - The key of the item to remove.
-   */
-  removeItem(key: string): void;
-
-  /**
-   * Clears all items from the storage.
-   */
-  clear(): void;
-
-  /**
-   * Checks if an item with the specified key exists in the storage.
-   * This method is optional.
-   *
-   * @param key - The key of the item to check.
-   * @returns True if the item exists, otherwise false.
-   */
-  has?(key: string): boolean;
-}
-
-export type IStrategy =
-  | "local"
-  | "session"
-  | "cookie"
-  | "memory"
-  | (string & NonNullable<unknown>);
+export type IStrategy = "local" | "session" | "cookie" | "memory";
 
 export interface IStrategyEvent<Value = unknown> {
   /**

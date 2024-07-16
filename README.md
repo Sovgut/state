@@ -1,6 +1,6 @@
 # @sovgut/state
 
-A lightweight and flexible state management library for TypeScript/JavaScript applications. This package provides an easy way to manage state using different storage mechanisms such as `localStorage`, `sessionStorage`, cookies, and an in-memory storage solution. Additionally, it supports an observer mode to listen for changes in the state.
+A lightweight and flexible state management library for any frontend application. This package provides an easy way to manage state using different storage mechanisms such as `localStorage`, `sessionStorage`, cookies, and an in-memory storage solution. Additionally, it supports an observer mode to listen for changes in the state.
 
 ## Installation
 
@@ -47,7 +47,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 
 export const App: React.FC = memo(() => {
   const [value, setValue] = useState<number>(
-    LocalState.get("random-number-key", { fallback: Math.random() })
+    LocalState.getItem("random-number-key", { fallback: Math.random() })
   );
 
   const handleUpdateEvent = useCallback((event: IStrategyEvent<number>) => {
@@ -57,7 +57,7 @@ export const App: React.FC = memo(() => {
   }, []);
 
   const handleOnClick = useCallback(() => {
-    LocalState.set("random-number-key", Math.random())
+    LocalState.setItem("random-number-key", Math.random())
   }, []);
 
   useEffect(() => {
@@ -77,12 +77,12 @@ export const App: React.FC = memo(() => {
 You can store different types of values in the state:
 
 ```typescript
-LocalState.set("key-1", 1n); // BigInt
-LocalState.set("key-2", 1); // Number
-LocalState.set("key-3", "foo"); // String
-LocalState.set("key-4", true); // Boolean
-LocalState.set("key-5", {}); // Object
-LocalState.set("key-6", []); // Array
+LocalState.setItem("key-1", 1n); // BigInt
+LocalState.setItem("key-2", 1); // Number
+LocalState.setItem("key-3", "foo"); // String
+LocalState.setItem("key-4", true); // Boolean
+LocalState.setItem("key-5", {}); // Object
+LocalState.setItem("key-6", []); // Array
 ```
 
 ### Getting Values
@@ -90,37 +90,37 @@ LocalState.set("key-6", []); // Array
 You can retrieve values from the state with optional type casting:
 
 ```typescript
-LocalState.get("key-1", { cast: "bigint" }); // 1n
-LocalState.get("key-2", { cast: "number" }); // 1
-LocalState.get("key-3", { cast: "string" }); // "foo"
-LocalState.get("key-4", { cast: "boolean" }); // true
-LocalState.get("key-5", { cast: "object" }); // {}
-LocalState.get("key-6", { cast: "object" }); // []
+LocalState.getItem("key-1", { cast: "bigint" }); // 1n
+LocalState.getItem("key-2", { cast: "number" }); // 1
+LocalState.getItem("key-3", { cast: "string" }); // "foo"
+LocalState.getItem("key-4", { cast: "boolean" }); // true
+LocalState.getItem("key-5", { cast: "object" }); // {}
+LocalState.getItem("key-6", { cast: "object" }); // []
 ```
 
 You can also provide fallback values, which not only supply a default value if the key does not exist, but also define the type to cast the retrieved value:
 
 ```typescript
-LocalState.get("nonexistent-key", { fallback: 1n }); // 1n
-LocalState.get("nonexistent-key", { fallback: 1 }); // 1
-LocalState.get("nonexistent-key", { fallback: "foo" }); // "foo"
-LocalState.get("nonexistent-key", { fallback: true }); // true
-LocalState.get("nonexistent-key", { fallback: {} }); // {}
-LocalState.get("nonexistent-key", { fallback: [] }); // []
+LocalState.getItem("nonexistent-key", { fallback: 1n }); // 1n
+LocalState.getItem("nonexistent-key", { fallback: 1 }); // 1
+LocalState.getItem("nonexistent-key", { fallback: "foo" }); // "foo"
+LocalState.getItem("nonexistent-key", { fallback: true }); // true
+LocalState.getItem("nonexistent-key", { fallback: {} }); // {}
+LocalState.getItem("nonexistent-key", { fallback: [] }); // []
 
-LocalState.set("key-1", 1n);
-LocalState.set("key-2", 1);
-LocalState.set("key-3", "foo");
-LocalState.set("key-4", true);
-LocalState.set("key-5", {});
-LocalState.set("key-6", []);
+LocalState.setItem("key-1", 1n);
+LocalState.setItem("key-2", 1);
+LocalState.setItem("key-3", "foo");
+LocalState.setItem("key-4", true);
+LocalState.setItem("key-5", {});
+LocalState.setItem("key-6", []);
 
-LocalState.get("key-1", { fallback: 2n }); // 1n
-LocalState.get("key-2", { fallback: 2 }); // 1
-LocalState.get("key-3", { fallback: "bar" }); // "foo"
-LocalState.get("key-4", { fallback: false }); // true
-LocalState.get("key-5", { fallback: { foo: "bar" } }); // {}
-LocalState.get("key-6", { fallback: [{ foo: "bar" }, { foo: "bar" }] }); // []
+LocalState.getItem("key-1", { fallback: 2n }); // 1n
+LocalState.getItem("key-2", { fallback: 2 }); // 1
+LocalState.getItem("key-3", { fallback: "bar" }); // "foo"
+LocalState.getItem("key-4", { fallback: false }); // true
+LocalState.getItem("key-5", { fallback: { foo: "bar" } }); // {}
+LocalState.getItem("key-6", { fallback: [{ foo: "bar" }, { foo: "bar" }] }); // []
 ```
 
 ### Removing Values
@@ -128,7 +128,7 @@ LocalState.get("key-6", { fallback: [{ foo: "bar" }, { foo: "bar" }] }); // []
 You can remove a specific key from the state:
 
 ```typescript
-LocalState.unset("key-1");
+LocalState.removeItem("key-1");
 ```
 
 ### Clearing All Values
@@ -152,13 +152,13 @@ LocalState.has("key-1"); // true or false
 The same API applies to `SessionState`, `MemoryState`, and `CookieState`:
 
 ```typescript
-SessionState.set("key", "value");
+SessionState.setItem("key", "value");
 const sessionValue = SessionState.get("key");
 
-MemoryState.set("key", "value");
+MemoryState.setItem("key", "value");
 const memoryValue = MemoryState.get("key");
 
-CookieState.set("key", "value");
+CookieState.setItem("key", "value");
 const cookieValue = CookieState.get("key");
 ```
 
@@ -200,8 +200,7 @@ export type IStrategy =
   | "local"
   | "session"
   | "cookie"
-  | "memory"
-  | (string & NonNullable<unknown>);
+  | "memory";
 
 export interface IStrategyEvent<Value = unknown> {
   /**
@@ -222,48 +221,6 @@ export interface IStrategyEvent<Value = unknown> {
    */
   strategy: IStrategy;
 }
-```
-
-## Extending to Custom Strategies
-
-You can extend the `BaseState` class to support custom storage by implementing the `IStrategyStorage` interface. Note that `CustomState` only supports synchronous functions and does not support asynchronous functions.
-
-```typescript
-import { BaseState, type IStrategyStorage } from "@sovgut/state";
-
-class MyCustomStrategy implements IStrategyStorage {
-  private storage = new Map<string, string>();
-
-  getItem(key: string) {
-    return this.storage.get(key) || null;
-  }
-
-  setItem(key: string, value: string) {
-    this.storage.set(key, value);
-  }
-
-  removeItem(key: string) {
-    this.storage.delete(key);
-  }
-
-  clear() {
-    this.storage.clear();
-  }
-
-  has(key: string) {
-    return this.storage.has(key);
-  }
-}
-
-class MyCustomState extends BaseState {
-  static {
-    MyCustomState.strategy = "my-custom-state"
-    MyCustomState.storage = new MyCustomStrategy();
-  }
-}
-
-MyCustomState.set("key", "value");
-const customValue = MyCustomState.get("key");
 ```
 
 ## Contributing

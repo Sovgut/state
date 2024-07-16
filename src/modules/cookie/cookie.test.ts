@@ -1,15 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CookieState } from "./cookie";
 
 describe(CookieState.name, () => {
-  it("should trigger event when a key is set", () => {
+  beforeEach(() => {
     CookieState.removeAllListeners();
     CookieState.clear();
+  });
 
+  it("should trigger event when a key is set", () => {
     const callback = vi.fn();
     CookieState.on("test-key", callback);
 
-    CookieState.set("test-key", "test-value");
+    CookieState.setItem("test-key", "test-value");
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
@@ -19,14 +21,11 @@ describe(CookieState.name, () => {
   });
 
   it("should trigger event once when a key is set with once", () => {
-    CookieState.removeAllListeners();
-    CookieState.clear();
-
     const callback = vi.fn();
     CookieState.once("test-key", callback);
 
-    CookieState.set("test-key", "test-value");
-    CookieState.set("test-key", "another-value");
+    CookieState.setItem("test-key", "test-value");
+    CookieState.setItem("test-key", "another-value");
 
     expect(callback).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith({
@@ -37,27 +36,21 @@ describe(CookieState.name, () => {
   });
 
   it("should not trigger event after it is removed", () => {
-    CookieState.removeAllListeners();
-    CookieState.clear();
-
     const callback = vi.fn();
     CookieState.on("test-key", callback);
     CookieState.off("test-key", callback);
 
-    CookieState.set("test-key", "test-value");
+    CookieState.setItem("test-key", "test-value");
 
     expect(callback).not.toHaveBeenCalled();
   });
 
   it("should trigger event when a key is unset", () => {
-    CookieState.removeAllListeners();
-    CookieState.clear();
-
     const callback = vi.fn();
     CookieState.on("test-key", callback);
 
-    CookieState.set("test-key", "test-value");
-    CookieState.unset("test-key");
+    CookieState.setItem("test-key", "test-value");
+    CookieState.removeItem("test-key");
 
     expect(callback).toHaveBeenCalledWith({
       key: "test-key",
@@ -66,69 +59,69 @@ describe(CookieState.name, () => {
   });
 
   it("Write and read data", () => {
-    CookieState.set("test-1", 1n);
-    CookieState.set("test-2", 1);
-    CookieState.set("test-3", "foo");
-    CookieState.set("test-4", true);
-    CookieState.set("test-5", {});
-    CookieState.set("test-6", []);
+    CookieState.setItem("test-1", 1n);
+    CookieState.setItem("test-2", 1);
+    CookieState.setItem("test-3", "foo");
+    CookieState.setItem("test-4", true);
+    CookieState.setItem("test-5", {});
+    CookieState.setItem("test-6", []);
 
-    expect(CookieState.get("test-1")).toBe("1");
-    expect(CookieState.get("test-2")).toBe("1");
-    expect(CookieState.get("test-3")).toBe("foo");
-    expect(CookieState.get("test-4")).toBe("true");
-    expect(CookieState.get("test-5")).toBe("{}");
-    expect(CookieState.get("test-6")).toBe("[]");
+    expect(CookieState.getItem("test-1")).toBe("1");
+    expect(CookieState.getItem("test-2")).toBe("1");
+    expect(CookieState.getItem("test-3")).toBe("foo");
+    expect(CookieState.getItem("test-4")).toBe("true");
+    expect(CookieState.getItem("test-5")).toBe("{}");
+    expect(CookieState.getItem("test-6")).toBe("[]");
   });
 
   it("Remove data", () => {
-    CookieState.set("test-1", 1n);
-    CookieState.set("test-2", 1);
-    CookieState.set("test-3", "foo");
-    CookieState.set("test-4", true);
-    CookieState.set("test-5", {});
-    CookieState.set("test-6", []);
+    CookieState.setItem("test-1", 1n);
+    CookieState.setItem("test-2", 1);
+    CookieState.setItem("test-3", "foo");
+    CookieState.setItem("test-4", true);
+    CookieState.setItem("test-5", {});
+    CookieState.setItem("test-6", []);
 
-    CookieState.unset("test-1");
-    CookieState.unset("test-2");
-    CookieState.unset("test-3");
-    CookieState.unset("test-4");
-    CookieState.unset("test-5");
-    CookieState.unset("test-6");
+    CookieState.removeItem("test-1");
+    CookieState.removeItem("test-2");
+    CookieState.removeItem("test-3");
+    CookieState.removeItem("test-4");
+    CookieState.removeItem("test-5");
+    CookieState.removeItem("test-6");
 
-    expect(CookieState.get("test-1")).toBe(undefined);
-    expect(CookieState.get("test-2")).toBe(undefined);
-    expect(CookieState.get("test-3")).toBe(undefined);
-    expect(CookieState.get("test-4")).toBe(undefined);
-    expect(CookieState.get("test-5")).toBe(undefined);
-    expect(CookieState.get("test-6")).toBe(undefined);
+    expect(CookieState.getItem("test-1")).toBe(undefined);
+    expect(CookieState.getItem("test-2")).toBe(undefined);
+    expect(CookieState.getItem("test-3")).toBe(undefined);
+    expect(CookieState.getItem("test-4")).toBe(undefined);
+    expect(CookieState.getItem("test-5")).toBe(undefined);
+    expect(CookieState.getItem("test-6")).toBe(undefined);
   });
 
   it("Clear data", () => {
-    CookieState.set("test-1", 1n);
-    CookieState.set("test-2", 1);
-    CookieState.set("test-3", "foo");
-    CookieState.set("test-4", true);
-    CookieState.set("test-5", {});
-    CookieState.set("test-6", []);
+    CookieState.setItem("test-1", 1n);
+    CookieState.setItem("test-2", 1);
+    CookieState.setItem("test-3", "foo");
+    CookieState.setItem("test-4", true);
+    CookieState.setItem("test-5", {});
+    CookieState.setItem("test-6", []);
 
     CookieState.clear();
 
-    expect(CookieState.get("test-1")).toBe(undefined);
-    expect(CookieState.get("test-2")).toBe(undefined);
-    expect(CookieState.get("test-3")).toBe(undefined);
-    expect(CookieState.get("test-4")).toBe(undefined);
-    expect(CookieState.get("test-5")).toBe(undefined);
-    expect(CookieState.get("test-6")).toBe(undefined);
+    expect(CookieState.getItem("test-1")).toBe(undefined);
+    expect(CookieState.getItem("test-2")).toBe(undefined);
+    expect(CookieState.getItem("test-3")).toBe(undefined);
+    expect(CookieState.getItem("test-4")).toBe(undefined);
+    expect(CookieState.getItem("test-5")).toBe(undefined);
+    expect(CookieState.getItem("test-6")).toBe(undefined);
   });
 
   it("Has data", () => {
-    CookieState.set("test-1", 1n);
-    CookieState.set("test-2", 1);
-    CookieState.set("test-3", "foo");
-    CookieState.set("test-4", true);
-    CookieState.set("test-5", {});
-    CookieState.set("test-6", []);
+    CookieState.setItem("test-1", 1n);
+    CookieState.setItem("test-2", 1);
+    CookieState.setItem("test-3", "foo");
+    CookieState.setItem("test-4", true);
+    CookieState.setItem("test-5", {});
+    CookieState.setItem("test-6", []);
 
     expect(CookieState.has("test-1")).toBe(true);
     expect(CookieState.has("test-2")).toBe(true);
@@ -139,41 +132,41 @@ describe(CookieState.name, () => {
   });
 
   it("Fallback data", () => {
-    expect(CookieState.get("test-1", { fallback: 1n })).toBe(1n);
-    expect(CookieState.get("test-2", { fallback: 1 })).toBe(1);
-    expect(CookieState.get("test-3", { fallback: "foo" })).toBe("foo");
-    expect(CookieState.get("test-4", { fallback: true })).toBe(true);
-    expect(CookieState.get("test-5", { fallback: {} })).toStrictEqual({});
-    expect(CookieState.get("test-6", { fallback: [] })).toStrictEqual([]);
+    expect(CookieState.getItem("test-1", { fallback: 1n })).toBe(1n);
+    expect(CookieState.getItem("test-2", { fallback: 1 })).toBe(1);
+    expect(CookieState.getItem("test-3", { fallback: "foo" })).toBe("foo");
+    expect(CookieState.getItem("test-4", { fallback: true })).toBe(true);
+    expect(CookieState.getItem("test-5", { fallback: {} })).toStrictEqual({});
+    expect(CookieState.getItem("test-6", { fallback: [] })).toStrictEqual([]);
   });
 
   it("Cast data", () => {
-    CookieState.set("test-1", 1n);
-    CookieState.set("test-2", 1);
-    CookieState.set("test-3", "foo");
-    CookieState.set("test-4", true);
-    CookieState.set("test-5", {});
-    CookieState.set("test-6", []);
+    CookieState.setItem("test-1", 1n);
+    CookieState.setItem("test-2", 1);
+    CookieState.setItem("test-3", "foo");
+    CookieState.setItem("test-4", true);
+    CookieState.setItem("test-5", {});
+    CookieState.setItem("test-6", []);
 
-    CookieState.set("test-7", 1n);
-    CookieState.set("test-8", 1);
-    CookieState.set("test-9", "foo");
-    CookieState.set("test-10", true);
-    CookieState.set("test-11", {});
-    CookieState.set("test-12", []);
+    CookieState.setItem("test-7", 1n);
+    CookieState.setItem("test-8", 1);
+    CookieState.setItem("test-9", "foo");
+    CookieState.setItem("test-10", true);
+    CookieState.setItem("test-11", {});
+    CookieState.setItem("test-12", []);
 
-    expect(CookieState.get("test-1", { cast: "bigint" })).toBe(1n);
-    expect(CookieState.get("test-2", { cast: "number" })).toBe(1);
-    expect(CookieState.get("test-3", { cast: "string" })).toBe("foo");
-    expect(CookieState.get("test-4", { cast: "boolean" })).toBe(true);
-    expect(CookieState.get("test-5", { cast: "object" })).toStrictEqual({});
-    expect(CookieState.get("test-6", { cast: "object" })).toStrictEqual([]);
+    expect(CookieState.getItem("test-1", { cast: "bigint" })).toBe(1n);
+    expect(CookieState.getItem("test-2", { cast: "number" })).toBe(1);
+    expect(CookieState.getItem("test-3", { cast: "string" })).toBe("foo");
+    expect(CookieState.getItem("test-4", { cast: "boolean" })).toBe(true);
+    expect(CookieState.getItem("test-5", { cast: "object" })).toStrictEqual({});
+    expect(CookieState.getItem("test-6", { cast: "object" })).toStrictEqual([]);
 
-    expect(CookieState.get("test-7", { fallback: 1n })).toBe(1n);
-    expect(CookieState.get("test-8", { fallback: 1 })).toBe(1);
-    expect(CookieState.get("test-9", { fallback: "foo" })).toBe("foo");
-    expect(CookieState.get("test-10", { fallback: true })).toBe(true);
-    expect(CookieState.get("test-11", { fallback: {} })).toStrictEqual({});
-    expect(CookieState.get("test-12", { fallback: [] })).toStrictEqual([]);
+    expect(CookieState.getItem("test-7", { fallback: 1n })).toBe(1n);
+    expect(CookieState.getItem("test-8", { fallback: 1 })).toBe(1);
+    expect(CookieState.getItem("test-9", { fallback: "foo" })).toBe("foo");
+    expect(CookieState.getItem("test-10", { fallback: true })).toBe(true);
+    expect(CookieState.getItem("test-11", { fallback: {} })).toStrictEqual({});
+    expect(CookieState.getItem("test-12", { fallback: [] })).toStrictEqual([]);
   });
 });

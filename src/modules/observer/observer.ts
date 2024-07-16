@@ -8,33 +8,33 @@ export interface ICallbackEvent<Payload = any> {
 export type EventCallback<Payload = any> = (data: ICallbackEvent<Payload>) => void;
 
 export class Observer {
-  protected static readonly instance = new EventEmitter();
+  protected static readonly observer = new EventEmitter();
 
   public static on<Payload = any>(event: string, callback: EventCallback<Payload>): void {
-    this.instance.on(event, callback);
+    this.observer.on(event, callback);
   }
 
   public static once<Payload = any>(event: string, callback: EventCallback<Payload>): void {
-    this.instance.once(event, callback);
+    this.observer.once(event, callback);
   }
 
   public static off(event: string, callback: EventCallback): void {
-    this.instance.off(event, callback);
+    this.observer.off(event, callback);
   }
 
   public static removeAllListeners(): void {
-    this.instance.removeAllListeners();
+    this.observer.removeAllListeners();
   }
 
   public static listenerCount(event: string): number {
-    return this.instance.listenerCount(event);
+    return this.observer.listenerCount(event);
   }
 
   public static removeListener(event: string): void {
-    this.instance.removeListener(event);
+    this.observer.removeListener(event);
   }
 
   public static eventNames(): (string | symbol)[] {
-    return this.instance.eventNames();
+    return this.observer.eventNames();
   }
 }
