@@ -1,11 +1,7 @@
+import { type IStrategyEvent } from "@/types";
 import EventEmitter from "eventemitter3";
 
-export interface ICallbackEvent<Payload = any> {
-  payload?: Payload;
-  strategy: string;
-}
-
-export type EventCallback<Payload = any> = (data: ICallbackEvent<Payload>) => void;
+export type EventCallback<Payload = any> = (event: IStrategyEvent<Payload>) => void;
 
 export class Observer {
   protected static readonly observer = new EventEmitter();

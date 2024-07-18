@@ -3,6 +3,4 @@ export { MemoryState } from "./modules/memory/memory";
 export { SessionState } from "./modules/session/session";
 export { CookieState } from "./modules/cookie/cookie";
 
-export type { ICallbackEvent } from "./modules/observer/observer";
-
 export type { IStrategyEvent, IStrategyOptions, IStrategy, ISupportedPrimitive } from "./types";
