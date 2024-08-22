@@ -9,9 +9,11 @@ on:
 
 jobs:
   check-version:
+    name: Version Check
     uses: Sovgut/state/.github/workflows/check-version.yml@main
 
   build:
+    name: Build
     needs:
       - check-version
     if: needs.check-version.outputs.is-changed == 'true'
@@ -21,6 +23,7 @@ jobs:
       package-version: ${{ needs.check-version.outputs.version }}
 
   test:
+    name: Test
     needs:
       - check-version
     if: needs.check-version.outputs.is-changed == 'true'
@@ -29,6 +32,7 @@ jobs:
       node-version: '20.x'
 
   deploy:
+    name: Deploy
     needs:
       - check-version
       - build
