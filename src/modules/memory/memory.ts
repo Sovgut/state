@@ -11,6 +11,7 @@ export class MemoryState extends Observer {
    * Retrieves the value associated with the specified key.
    *
    * @param key - The key of the item to retrieve.
+   * @param [options] - The strategy options like `fallback` or `cast`.
    * @returns The value associated with the key, or null if not found.
    */
   public static getItem<Type = unknown>(key: string, options?: IStrategyOptions<Type>): Type {
