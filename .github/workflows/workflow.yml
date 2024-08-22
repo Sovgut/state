@@ -23,7 +23,7 @@ jobs:
   test:
     needs:
       - check-version
-      - build
+    if: needs.check-version.outputs.is-changed == 'true'
     uses: Sovgut/state/.github/workflows/test.yml@main
     with:
       node-version: '20.x'
