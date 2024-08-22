@@ -4,24 +4,8 @@
 import { defineConfig } from "vite";
 import { URL, fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { minify } from "terser";
 
 import dts from "vite-plugin-dts";
-
-function minifyBundles() {
-  return {
-    name: "minifyBundles",
-    async generateBundle(options, bundle) {
-      for (let key in bundle) {
-        if (bundle[key].type == 'chunk' && key.endsWith('.js')) {
-          const minifyCode = await minify(bundle[key].code, { sourceMap: false })
-          bundle[key].code = minifyCode.code
-        }
-      }
-      return bundle
-    },
-  }
-}
 
 export default defineConfig({
   plugins: [
@@ -33,12 +17,10 @@ export default defineConfig({
         "**/*.spec.tsx",
       ],
     }),
-    minifyBundles(),
   ],
   build: {
     copyPublicDir: false,
     sourcemap: false,
-    minify: true,
     lib: {
       fileName: "main",
       name: '@sovgut/state',
