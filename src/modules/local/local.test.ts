@@ -169,4 +169,44 @@ describe(LocalState.name, () => {
     expect(LocalState.getItem("test-11", { fallback: {} })).toStrictEqual({});
     expect(LocalState.getItem("test-12", { fallback: [] })).toStrictEqual([]);
   });
+
+  it("use fallback data if value contains `undefined`, `null` or `NaN`", () => {
+    LocalState.setItem("test-1", "undefined");
+    LocalState.setItem("test-2", "null");
+    LocalState.setItem("test-3", "NaN");
+    LocalState.setItem("test-4", "bigint");
+    LocalState.setItem("test-5", "string");
+
+    expect(LocalState.getItem("test-1")).toBe(undefined);
+    expect(LocalState.getItem("test-2")).toBe(undefined);
+    expect(LocalState.getItem("test-3")).toBe(undefined);
+    expect(LocalState.getItem("test-4")).toBe("bigint");
+    expect(LocalState.getItem("test-5")).toBe("string");
+
+    expect(LocalState.getItem("test-1", { fallback: 1n })).toBe(1n);
+    expect(LocalState.getItem("test-2", { fallback: 1 })).toBe(1);
+    expect(LocalState.getItem("test-3", { fallback: { foo: "bar" } })).toStrictEqual({ foo: "bar" });
+    expect(LocalState.getItem("test-4", { fallback: 1n })).toBe(1n);
+    expect(LocalState.getItem("test-5", { fallback: "FizzBuzz" })).toBe("string");
+  })
+
+  it("should skip fallback data if value contains `undefined`, `null` or `NaN`", () => {
+    LocalState.setItem("test-1", "undefined");
+    LocalState.setItem("test-2", "null");
+    LocalState.setItem("test-3", "NaN");
+    LocalState.setItem("test-4", "bigint");
+    LocalState.setItem("test-5", "string");
+
+    expect(LocalState.getItem("test-1", { allowAnyString: true })).toBe("undefined");
+    expect(LocalState.getItem("test-2", { allowAnyString: true })).toBe("null");
+    expect(LocalState.getItem("test-3", { allowAnyString: true })).toBe("NaN");
+    expect(LocalState.getItem("test-4", { allowAnyString: true })).toBe("bigint");
+    expect(LocalState.getItem("test-5", { allowAnyString: true })).toBe("string");
+
+    expect(LocalState.getItem("test-1", { allowAnyString: true, fallback: 1n })).toBe(1n);
+    expect(LocalState.getItem("test-2", { allowAnyString: true, fallback: 1 })).toBe(1);
+    expect(LocalState.getItem("test-3", { allowAnyString: true, fallback: { foo: "bar" } })).toStrictEqual({ foo: "bar" });
+    expect(LocalState.getItem("test-4", { allowAnyString: true, fallback: 1n })).toBe(1n);
+    expect(LocalState.getItem("test-5", { allowAnyString: true, fallback: "FizzBuzz" })).toBe("string");
+  })
 });

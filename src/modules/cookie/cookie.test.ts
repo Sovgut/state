@@ -169,4 +169,44 @@ describe(CookieState.name, () => {
     expect(CookieState.getItem("test-11", { fallback: {} })).toStrictEqual({});
     expect(CookieState.getItem("test-12", { fallback: [] })).toStrictEqual([]);
   });
+
+  it("use fallback data if value contains `undefined`, `null` or `NaN`", () => {
+    CookieState.setItem("test-1", "undefined");
+    CookieState.setItem("test-2", "null");
+    CookieState.setItem("test-3", "NaN");
+    CookieState.setItem("test-4", "bigint");
+    CookieState.setItem("test-5", "string");
+
+    expect(CookieState.getItem("test-1")).toBe(undefined);
+    expect(CookieState.getItem("test-2")).toBe(undefined);
+    expect(CookieState.getItem("test-3")).toBe(undefined);
+    expect(CookieState.getItem("test-4")).toBe("bigint");
+    expect(CookieState.getItem("test-5")).toBe("string");
+
+    expect(CookieState.getItem("test-1", { fallback: 1n })).toBe(1n);
+    expect(CookieState.getItem("test-2", { fallback: 1 })).toBe(1);
+    expect(CookieState.getItem("test-3", { fallback: { foo: "bar" } })).toStrictEqual({ foo: "bar" });
+    expect(CookieState.getItem("test-4", { fallback: 1n })).toBe(1n);
+    expect(CookieState.getItem("test-5", { fallback: "FizzBuzz" })).toBe("string");
+  })
+
+  it("should skip fallback data if value contains `undefined`, `null` or `NaN`", () => {
+    CookieState.setItem("test-1", "undefined");
+    CookieState.setItem("test-2", "null");
+    CookieState.setItem("test-3", "NaN");
+    CookieState.setItem("test-4", "bigint");
+    CookieState.setItem("test-5", "string");
+
+    expect(CookieState.getItem("test-1", { allowAnyString: true })).toBe("undefined");
+    expect(CookieState.getItem("test-2", { allowAnyString: true })).toBe("null");
+    expect(CookieState.getItem("test-3", { allowAnyString: true })).toBe("NaN");
+    expect(CookieState.getItem("test-4", { allowAnyString: true })).toBe("bigint");
+    expect(CookieState.getItem("test-5", { allowAnyString: true })).toBe("string");
+
+    expect(CookieState.getItem("test-1", { allowAnyString: true, fallback: 1n })).toBe(1n);
+    expect(CookieState.getItem("test-2", { allowAnyString: true, fallback: 1 })).toBe(1);
+    expect(CookieState.getItem("test-3", { allowAnyString: true, fallback: { foo: "bar" } })).toStrictEqual({ foo: "bar" });
+    expect(CookieState.getItem("test-4", { allowAnyString: true, fallback: 1n })).toBe(1n);
+    expect(CookieState.getItem("test-5", { allowAnyString: true, fallback: "FizzBuzz" })).toBe("string");
+  })
 });

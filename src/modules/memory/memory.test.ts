@@ -169,4 +169,44 @@ describe(MemoryState.name, () => {
     expect(MemoryState.getItem("test-11", { fallback: {} })).toStrictEqual({});
     expect(MemoryState.getItem("test-12", { fallback: [] })).toStrictEqual([]);
   });
+
+  it("use fallback data if value contains `undefined`, `null` or `NaN`", () => {
+    MemoryState.setItem("test-1", "undefined");
+    MemoryState.setItem("test-2", "null");
+    MemoryState.setItem("test-3", "NaN");
+    MemoryState.setItem("test-4", "bigint");
+    MemoryState.setItem("test-5", "string");
+
+    expect(MemoryState.getItem("test-1")).toBe(undefined);
+    expect(MemoryState.getItem("test-2")).toBe(undefined);
+    expect(MemoryState.getItem("test-3")).toBe(undefined);
+    expect(MemoryState.getItem("test-4")).toBe("bigint");
+    expect(MemoryState.getItem("test-5")).toBe("string");
+
+    expect(MemoryState.getItem("test-1", { fallback: 1n })).toBe(1n);
+    expect(MemoryState.getItem("test-2", { fallback: 1 })).toBe(1);
+    expect(MemoryState.getItem("test-3", { fallback: { foo: "bar" } })).toStrictEqual({ foo: "bar" });
+    expect(MemoryState.getItem("test-4", { fallback: 1n })).toBe(1n);
+    expect(MemoryState.getItem("test-5", { fallback: "FizzBuzz" })).toBe("string");
+  })
+
+  it("should skip fallback data if value contains `undefined`, `null` or `NaN`", () => {
+    MemoryState.setItem("test-1", "undefined");
+    MemoryState.setItem("test-2", "null");
+    MemoryState.setItem("test-3", "NaN");
+    MemoryState.setItem("test-4", "bigint");
+    MemoryState.setItem("test-5", "string");
+
+    expect(MemoryState.getItem("test-1", { allowAnyString: true })).toBe("undefined");
+    expect(MemoryState.getItem("test-2", { allowAnyString: true })).toBe("null");
+    expect(MemoryState.getItem("test-3", { allowAnyString: true })).toBe("NaN");
+    expect(MemoryState.getItem("test-4", { allowAnyString: true })).toBe("bigint");
+    expect(MemoryState.getItem("test-5", { allowAnyString: true })).toBe("string");
+
+    expect(MemoryState.getItem("test-1", { allowAnyString: true, fallback: 1n })).toBe(1n);
+    expect(MemoryState.getItem("test-2", { allowAnyString: true, fallback: 1 })).toBe(1);
+    expect(MemoryState.getItem("test-3", { allowAnyString: true, fallback: { foo: "bar" } })).toStrictEqual({ foo: "bar" });
+    expect(MemoryState.getItem("test-4", { allowAnyString: true, fallback: 1n })).toBe(1n);
+    expect(MemoryState.getItem("test-5", { allowAnyString: true, fallback: "FizzBuzz" })).toBe("string");
+  })
 });
