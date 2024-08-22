@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    environment: Production
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

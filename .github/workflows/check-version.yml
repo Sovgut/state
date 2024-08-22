@@ -1,21 +1,19 @@
-name: Check version
-
 on:
   workflow_call:
     outputs:
       version:
         description: 'Package version'
-        value: ${{ jobs.current-version.outputs.version }}
+        value: ${{ jobs.check-version.outputs.version }}
       is-changed:
         description: 'Package version state'
         value: ${{ jobs.check-version.outputs.is-changed }}
 
 jobs:
-  current-version:
+  check-version:
     runs-on: ubuntu-latest
-    environment: Version Check
 
     outputs:
+      is-changed: ${{ steps.check-version.outputs.is-changed }}
       version: ${{ steps.get-current-version.outputs.version }}
 
     steps:
@@ -31,20 +29,6 @@ jobs:
           echo "Current version in package.json: $CURR_VERSION"
           echo "version=$CURR_VERSION" >> $GITHUB_OUTPUT
 
-  check-version:
-    needs: current-version
-    runs-on: ubuntu-latest
-    environment: Version Check
-
-    outputs:
-      is-changed: ${{ steps.check-version.outputs.is-changed }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
       - name: Get previous version from package.json
         id: get-previous-version
         run: |
@@ -56,7 +40,7 @@ jobs:
         id: check-version
         run: |
           echo "Previous version: ${{ steps.get-previous-version.outputs.prev-version }}"
-          echo "Current version: ${{ needs.current-version.outputs.version }}"
+          echo "Current version: ${{ steps.get-current-version.outputs.version }}"
           if [ "$PREV_VERSION" = "none" ] || [ "${{ steps.get-current-version.outputs.version }}" != "${{ steps.get-previous-version.outputs.prev-version }}" ]; then
             echo "is-changed=true" >> $GITHUB_OUTPUT
           else
