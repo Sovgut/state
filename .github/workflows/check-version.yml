@@ -5,10 +5,10 @@ on:
     outputs:
       version:
         description: 'Package version'
-        value: ${{ steps.get_current_version.outputs.version }}
+        value: ${{ jobs.check-version.outputs.version }}
       is_changed:
         description: 'Package version state'
-        value: ${{ steps.check_version.outputs.is_changed }}
+        value: ${{ jobs.check-version.outputs.is_changed }}
 
 jobs:
   check-version:
