@@ -84,4 +84,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-workflow:
-    uses: Sovgut/state/.github/workflows/workflow.yml@v1
+    uses: Sovgut/state/.github/workflows/workflow.yml@main
