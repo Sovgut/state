@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
     environment: Production
     steps:
       - name: Checkout repository
@@ -36,12 +37,9 @@ jobs:
         with:
           always-auth: true
           node-version: ${{ inputs.node-version }}
-          registry-url: "https://registry.npmjs.org"
+          registry-url: "https://npm.pkg.github.com"
 
-      - name: Configure NPM to use registry with authentication
-        run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-
-      - name: Publish to NPM
-        run: npm publish --access public
+      - name: Publish to Github
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

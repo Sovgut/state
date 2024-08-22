@@ -22,18 +22,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'npm'
           node-version: ${{ inputs.node-version }}
 
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
-
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
+        run: npm ci
 
       - name: Build
         run: npm run build
