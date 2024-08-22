@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      is_changed: ${{ steps.check-version.outputs.is-changed }}
+      is-changed: ${{ steps.check-version.outputs.is-changed }}
       version: ${{ steps.get-current-version.outputs.version }}
 
     steps:
