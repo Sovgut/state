@@ -8,6 +8,12 @@ export type ISupportedPrimitive = "bigint" | "boolean" | "number" | "object" | "
 export interface IStrategyOptions<Fallback = unknown> {
   fallback?: Fallback;
   cast?: ISupportedPrimitive;
+
+  /**
+   * Disables behavior when storage value contains `'undefined'`, `'null'` or `'NaN'` (strings)
+   * and returns `options.fallback`.
+   */
+  allowAnyString?: boolean;
 }
 
 export type IStrategy = "local" | "session" | "cookie" | "memory";

@@ -1,9 +1,17 @@
 import { IStrategyOptions } from "@/types";
 
 export function serialize<Fallback = unknown>(value: string | undefined | null, options?: IStrategyOptions<Fallback>): Fallback {
-  if (typeof value === "undefined" || value === undefined) return options?.fallback as Fallback;
+  const fallback = options?.fallback ?? value as Fallback;
+
+  if (typeof value === "undefined" || value === undefined) return fallback;
   if (value === null) {
-    return options?.fallback as Fallback;
+    return fallback;
+  }
+
+  if (!options?.allowAnyString) {
+    if (value === 'undefined') return fallback;
+    if (value === 'null') return fallback;
+    if (value === 'NaN') return fallback;
   }
 
   const type = options?.cast ?? typeof options?.fallback;
