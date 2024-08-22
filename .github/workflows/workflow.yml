@@ -35,4 +35,5 @@ jobs:
       - test
     uses: Sovgut/state/.github/workflows/deploy.yml@main
     with:
+      node-version: '20.x'
       package-version: ${{ needs.check-version.outputs.version }}
