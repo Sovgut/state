@@ -3,7 +3,7 @@ name: Deploy
 on:
   workflow_call:
     inputs:
-      package_version:
+      package-version:
         description: "Package version"
         required: true
         type: string
@@ -20,8 +20,8 @@ jobs:
       - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-${{inputs.package_version}}
-          path: dist-${{inputs.package_version}}
+          name: dist-${{inputs.package-version}}
+          path: dist-${{inputs.package-version}}
 
       - name: Configure npm for publishing
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc

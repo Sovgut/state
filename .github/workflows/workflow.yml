@@ -14,11 +14,11 @@ jobs:
   build:
     needs:
       - check-version
-    if: needs.check-version.outputs.is_changed == 'true'
+    if: needs.check-version.outputs.is-changed == 'true'
     uses: Sovgut/state/.github/workflows/build.yml@main
     with:
-      node_version: '20.x'
-      package_version: ${{ needs.check-version.outputs.version }}
+      node-version: '20.x'
+      package-version: ${{ needs.check-version.outputs.version }}
 
   test:
     needs:
@@ -26,7 +26,7 @@ jobs:
       - build
     uses: Sovgut/state/.github/workflows/test.yml@main
     with:
-      node_version: '20.x'
+      node-version: '20.x'
 
   deploy:
     needs:
@@ -35,4 +35,4 @@ jobs:
       - test
     uses: Sovgut/state/.github/workflows/deploy.yml@main
     with:
-      package_version: ${{ needs.check-version.outputs.version }}
+      package-version: ${{ needs.check-version.outputs.version }}

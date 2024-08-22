@@ -7,7 +7,7 @@ on:
         description: "Node version"
         required: true
         type: string
-      package_version:
+      package-version:
         description: "Package version"
         required: true
         type: string
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version }}
+          node-version: ${{ inputs.node-version }}
 
       - name: Cache dependencies
         id: cache
@@ -41,5 +41,5 @@ jobs:
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{inputs.package_version}}
-          path: dist-${{inputs.package_version}}
+          name: dist-${{inputs.package-version}}
+          path: dist-${{inputs.package-version}}
