@@ -1,79 +1,20 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "package.json"
+  workflow_call:
+    inputs:
+      node-version:
+        description: "Node version"
+        required: true
+        type: string
+      package_version:
+        description: "Package version"
+        required: true
+        type: string
 
 jobs:
-  check-version:
-    runs-on: ubuntu-latest
-    outputs:
-      version_changed: ${{ steps.check_version.outputs.version_changed }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Get current version from package.json
-        id: get_current_version
-        run: |
-          CURR_VERSION=$(grep '"version":' package.json | sed -E 's/.*"([^"]+)".*/\1/')
-          echo "Current version in package.json: $CURR_VERSION"
-          echo "curr_version=$CURR_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Get previous version from package.json
-        id: get_previous_version
-        run: |
-          PREV_VERSION=$(git show HEAD~1:package.json | grep '"version":' | sed -E 's/.*"([^"]+)".*/\1/' || echo "none")
-          echo "Previous version in package.json: $PREV_VERSION"
-          echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Check version increment
-        id: check_version
-        run: |
-          echo "Previous version: ${{ steps.get_previous_version.outputs.prev_version }}"
-          echo "Current version: ${{ steps.get_current_version.outputs.curr_version }}"
-          if [ "$PREV_VERSION" = "none" ] || [ "${{ steps.get_current_version.outputs.curr_version }}" != "${{ steps.get_previous_version.outputs.prev_version }}" ]; then
-            echo "version_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "version_changed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Output version_changed
-        run: |
-          echo "Version changed: ${{ steps.check_version.outputs.version_changed }}"
-
-  install-dependencies:
-    runs-on: ubuntu-latest
-    needs: check-version
-    if: needs.check-version.outputs.version_changed == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
-
   build:
     runs-on: ubuntu-latest
-    needs: install-dependencies
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -81,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ inputs.node_version }}
 
       - name: Cache dependencies
         id: cache
@@ -94,5 +35,11 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
 
-      - name: Building codebase
+      - name: Build
         run: npm run build
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{inputs.package_version}}
+          path: dist-${{inputs.package_version}}
