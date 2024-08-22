@@ -17,6 +17,7 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to NPM
     runs-on: ubuntu-latest
     permissions:
       id-token: write
