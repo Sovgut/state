@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows:
       - Build
-    branches:
-      - main
 
 jobs:
   install-dependencies:
