@@ -35,7 +35,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: test
-        run: cat ./.npmrc
+        run: cat $NPM_CONFIG_USERCONFIG
 
       - name: Publish to NPM
         run: npm publish --access public
