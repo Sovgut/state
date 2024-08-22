@@ -5,18 +5,18 @@ on:
     outputs:
       version:
         description: 'Package version'
-        value: ${{ steps.check_version.outputs.version }}
+        value: ${{ steps.check-version.outputs.version }}
       is_changed:
         description: 'Package version state'
-        value: ${{ steps.check_version.outputs.is_changed }}
+        value: ${{ steps.check-version.outputs.is_changed }}
 
 jobs:
   check-version:
     runs-on: ubuntu-latest
 
     outputs:
-      is_changed: ${{ steps.check_version.outputs.is_changed }}
-      version: ${{ steps.check_version.outputs.version }}
+      is_changed: ${{ steps.check-version.outputs.is_changed }}
+      version: ${{ steps.check-version.outputs.version }}
 
     steps:
       - name: Checkout repository
