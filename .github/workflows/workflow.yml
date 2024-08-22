@@ -51,8 +51,6 @@ jobs:
       - build
       - test
     uses: Sovgut/state/.github/workflows/deploy-github.yml@main
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
       node-version: '20.x'
       package-version: ${{ needs.check-version.outputs.version }}
