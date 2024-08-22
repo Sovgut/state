@@ -21,6 +21,7 @@ jobs:
           fetch-depth: 2
 
   check-version:
+    needs: git-checkout
     runs-on: ubuntu-latest
 
     outputs:
