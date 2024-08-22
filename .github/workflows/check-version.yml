@@ -3,13 +3,13 @@ on:
     outputs:
       version:
         description: 'Package version'
-        value: ${{ jobs.check-version.outputs.version }}
+        value: ${{ jobs.version.outputs.version }}
       is-changed:
         description: 'Package version state'
-        value: ${{ jobs.check-version.outputs.is-changed }}
+        value: ${{ jobs.version.outputs.is-changed }}
 
 jobs:
-  check-version:
+  version:
     runs-on: ubuntu-latest
 
     outputs:
