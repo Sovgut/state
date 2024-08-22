@@ -29,13 +29,12 @@ jobs:
 
       - name: Use Node.js
         uses: actions/setup-node@v4
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           always-auth: true
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
-
-      - name: test
-        run: cat $NPM_CONFIG_USERCONFIG
 
       - name: Publish to NPM
         run: npm publish --access public
