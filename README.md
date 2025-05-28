@@ -20,7 +20,7 @@
 - **📦 TypeScript First** - Full TypeScript support with intelligent type inference
 - **🔄 Reactive Updates** - Built-in observer pattern for real-time state synchronization
 - **🛡️ Type Safety** - Automatic type casting and validation with custom error handling
-- **🪶 Lightweight** - Zero dependencies, minimal bundle size
+- **🪶 Lightweight** - Minimal bundle size
 - **🔧 Flexible Configuration** - Fallback values, strict mode, and custom casting options
 - **🍪 Advanced Cookie Support** - Full cookie options including SameSite, Secure, and expiration
 
@@ -63,9 +63,7 @@ LocalState.on("user", (event) => {
 - [Observer Pattern](#-observer-pattern)
 - [React Integration](#-react-integration)
 - [API Reference](#-api-reference)
-- [Advanced Patterns](#-advanced-patterns)
 - [Error Handling](#-error-handling)
-- [Best Practices](#-best-practices)
 
 ## 💾 Storage Strategies
 
@@ -416,133 +414,6 @@ Removes an event listener.
 
 Removes all event listeners.
 
-## 🎨 Advanced Patterns
-
-### Namespaced Keys
-
-```typescript
-class UserState {
-  private static prefix = "user:";
-
-  static set(key: string, value: unknown) {
-    LocalState.set(`${this.prefix}${key}`, value);
-  }
-
-  static get<T>(key: string, options?: GetOptions<T>) {
-    return LocalState.get<T>(`${this.prefix}${key}`, options);
-  }
-
-  static remove(key: string) {
-    LocalState.remove(`${this.prefix}${key}`);
-  }
-
-  static clear() {
-    // Clear only user-prefixed keys
-    const keys = Object.keys(localStorage)
-      .filter(key => key.startsWith(this.prefix));
-    
-    keys.forEach(key => {
-      LocalState.remove(key.replace(this.prefix, ""));
-    });
-  }
-}
-
-// Usage
-UserState.set("profile", { name: "Alice" });
-UserState.set("preferences", { theme: "dark" });
-const profile = UserState.get("profile");
-```
-
-### State Migrations
-
-```typescript
-class MigrationManager {
-  static migrate() {
-    const version = LocalState.get("schema_version", { fallback: 0 });
-
-    if (version < 1) {
-      // Migrate from v0 to v1
-      const oldUser = LocalState.get("user_name");
-      if (oldUser) {
-        LocalState.set("user", { name: oldUser, version: 1 });
-        LocalState.remove("user_name");
-      }
-      LocalState.set("schema_version", 1);
-    }
-
-    if (version < 2) {
-      // Migrate from v1 to v2
-      const user = LocalState.get<any>("user");
-      if (user) {
-        LocalState.set("user", { ...user, createdAt: Date.now(), version: 2 });
-      }
-      LocalState.set("schema_version", 2);
-    }
-  }
-}
-
-// Run migrations on app start
-MigrationManager.migrate();
-```
-
-### Computed State
-
-```typescript
-class ComputedState {
-  static getTotalPrice() {
-    const items = LocalState.get<CartItem[]>("cart", { fallback: [] });
-    const taxRate = LocalState.get("taxRate", { fallback: 0.08 });
-    
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    return subtotal * (1 + taxRate);
-  }
-
-  static getIsLoggedIn() {
-    return LocalState.has("user") && LocalState.has("authToken");
-  }
-
-  static getUserDisplayName() {
-    const user = LocalState.get<User>("user");
-    return user?.displayName || user?.email || "Guest";
-  }
-}
-```
-
-### State Persistence Middleware
-
-```typescript
-class PersistenceMiddleware {
-  private static syncTargets = new Map<string, 'local' | 'session' | 'memory' | 'cookie'>();
-
-  static sync(key: string, from: 'local' | 'session', to: 'local' | 'session') {
-    const sources = {
-      local: LocalState,
-      session: SessionState
-    };
-
-    const source = sources[from];
-    const target = sources[to];
-
-    // Initial sync
-    const value = source.get(key);
-    if (value !== undefined) {
-      target.set(key, value);
-    }
-
-    // Continuous sync
-    source.on(key, (event) => {
-      if (event === null) {
-        target.remove(key);
-      } else {
-        target.set(key, event);
-      }
-    });
-  }
-}
-
-// Keep auth token in sync between local and session storage
-PersistenceMiddleware.sync("authToken", "local", "session");
-```
 
 ## 🛡️ Error Handling
 
@@ -571,145 +442,19 @@ try {
 }
 ```
 
-### Safe Wrappers
-
-```typescript
-class SafeState {
-  static get<T>(key: string, defaultValue: T): T {
-    try {
-      return LocalState.get(key, { fallback: defaultValue }) ?? defaultValue;
-    } catch {
-      console.warn(`Failed to get "${key}", using default value`);
-      return defaultValue;
-    }
-  }
-
-  static set<T>(key: string, value: T): boolean {
-    try {
-      LocalState.set(key, value);
-      return true;
-    } catch (error) {
-      console.error(`Failed to set "${key}":`, error);
-      return false;
-    }
-  }
-}
-```
-
-## 🏆 Best Practices
-
-### 1. Use TypeScript Interfaces
-
-```typescript
-interface AppState {
-  user: User | null;
-  theme: 'light' | 'dark';
-  language: 'en' | 'es' | 'fr';
-}
-
-class TypedState {
-  static get<K extends keyof AppState>(key: K): AppState[K] | undefined {
-    return LocalState.get(key);
-  }
-
-  static set<K extends keyof AppState>(key: K, value: AppState[K]): void {
-    LocalState.set(key, value);
-  }
-}
-```
-
-### 2. Centralize State Keys
-
-```typescript
-const StateKeys = {
-  USER: 'user',
-  THEME: 'theme',
-  CART: 'cart',
-  PREFERENCES: 'preferences'
-} as const;
-
-// Usage
-LocalState.set(StateKeys.USER, currentUser);
-const theme = LocalState.get(StateKeys.THEME);
-```
-
-### 3. Create Domain-Specific Stores
-
-```typescript
-class AuthStore {
-  static setUser(user: User) {
-    LocalState.set('auth:user', user);
-    LocalState.set('auth:lastLogin', Date.now());
-  }
-
-  static getUser() {
-    return LocalState.get<User>('auth:user');
-  }
-
-  static logout() {
-    LocalState.remove('auth:user');
-    LocalState.remove('auth:token');
-    LocalState.remove('auth:lastLogin');
-  }
-
-  static isAuthenticated() {
-    return LocalState.has('auth:user') && LocalState.has('auth:token');
-  }
-}
-```
-
-### 4. Handle Storage Quota Errors
-
-```typescript
-class QuotaSafeState {
-  static set<T>(key: string, value: T): boolean {
-    try {
-      LocalState.set(key, value);
-      return true;
-    } catch (error) {
-      if (error.name === 'QuotaExceededError') {
-        // Try to clear old data
-        this.clearOldData();
-        
-        // Retry
-        try {
-          LocalState.set(key, value);
-          return true;
-        } catch {
-          console.error('Storage quota exceeded');
-          return false;
-        }
-      }
-      throw error;
-    }
-  }
-
-  private static clearOldData() {
-    // Implement your cleanup strategy
-    const keys = Object.keys(localStorage);
-    const oldKeys = keys.filter(key => {
-      const data = LocalState.get<any>(key);
-      return data?.timestamp && Date.now() - data.timestamp > 30 * 24 * 60 * 60 * 1000;
-    });
-    
-    oldKeys.forEach(key => LocalState.remove(key));
-  }
-}
-```
-
 ## 🤝 Contributing
 
-We welcome contributions! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request on [GitHub](https://github.com/sovgut/state).
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-Built with ❤️ by [sovgut](https://github.com/sovgut)
-
 ---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/sovgut">sovgut</a>
+</p>
 
 <p align="center">
   <a href="https://github.com/sovgut/state">GitHub</a> •
