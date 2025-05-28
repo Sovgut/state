@@ -57,15 +57,15 @@ LocalState.on("user", (event) => {
 
 ## 📖 Table of Contents
 
-- [Storage Strategies](#storage-strategies)
-- [Basic Usage](#basic-usage)
-- [Type Safety & Casting](#type-safety--casting)
-- [Observer Pattern](#observer-pattern)
-- [React Integration](#react-integration)
-- [API Reference](#api-reference)
-- [Advanced Patterns](#advanced-patterns)
-- [Error Handling](#error-handling)
-- [Best Practices](#best-practices)
+- [Storage Strategies](#-storage-strategies)
+- [Basic Usage](#-basic-usage)
+- [Type Safety & Casting](#-type-safety--casting)
+- [Observer Pattern](#-observer-pattern)
+- [React Integration](#-react-integration)
+- [API Reference](#-api-reference)
+- [Advanced Patterns](#-advanced-patterns)
+- [Error Handling](#-error-handling)
+- [Best Practices](#-best-practices)
 
 ## 💾 Storage Strategies
 
@@ -714,5 +714,5 @@ Built with ❤️ by [sovgut](https://github.com/sovgut)
 <p align="center">
   <a href="https://github.com/sovgut/state">GitHub</a> •
   <a href="https://www.npmjs.com/package/@sovgut/state">npm</a> •
-  <a href="#api-reference">Documentation</a>
+  <a href="#-api-reference">Documentation</a>
 </p>
