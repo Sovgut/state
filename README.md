@@ -1,14 +1,14 @@
 # @sovgut/state
 
 <p align="center">
+  <b>A lightweight, type-safe, and reactive state management library for modern web applications</b>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/npm/v/@sovgut/state" alt="npm version" />
   <img src="https://img.shields.io/npm/dm/@sovgut/state" alt="npm downloads" />
   <img src="https://img.shields.io/github/license/sovgut/state" alt="license" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
-</p>
-
-<p align="center">
-  <b>A lightweight, type-safe, and reactive state management library for modern web applications</b>
 </p>
 
 ---
