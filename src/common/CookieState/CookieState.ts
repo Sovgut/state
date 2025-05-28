@@ -150,11 +150,6 @@ export class CookieState extends Observer {
       }
     }
 
-    // Debug: Log cookie string in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Setting cookie: ${cookieString}`);
-    }
-
     document.cookie = cookieString;
     CookieState.emit(key, value);
   }
