@@ -29,10 +29,7 @@ export class CookieState extends Observer {
   static get<T = unknown>(key: string, options?: Options<T>): T | undefined;
   static get<T = unknown>(key: string, options: Options<T> = {}): T | undefined {
     const cookies = document.cookie.split(';');
-    const cookie = cookies.find(c => {
-      const trimmed = c.trim();
-      return trimmed.startsWith(`${key}=`) || trimmed === key;
-    });
+    const cookie = cookies.find(c => c.trim().startsWith(`${key}=`));
 
     if (!cookie) {
       if (options.strict) {
@@ -41,21 +38,10 @@ export class CookieState extends Observer {
       return options.fallback !== undefined ? options.fallback : undefined;
     }
 
-    // Fix: Handle cookies with multiple '=' in value
-    const [_cookieKey, ...valueParts] = cookie.trim().split('=');
-    const value = valueParts.join('='); // Rejoin in case value contains '='
-    
-    if (!value) {
-      if (options.strict) {
-        throw new StateDoesNotExist(key, 'cookies');
-      }
-      return options.fallback !== undefined ? options.fallback : undefined;
-    }
-
-    const decodedValue = decodeURIComponent(value);
+    const value = decodeURIComponent(cookie.split('=')[1]);
 
     try {
-      let parsed = JSON.parse(decodedValue) as T;
+      let parsed = JSON.parse(value) as T;
 
       // Check for empty values when fallback is enabled
       if (options.fallback !== undefined &&
@@ -92,25 +78,25 @@ export class CookieState extends Observer {
         try {
           switch (options.cast) {
             case 'string':
-              return decodedValue as T;
+              return value as T;
             case 'number':
-              return Number(decodedValue) as T;
+              return Number(value) as T;
             case 'boolean':
-              return (decodedValue === 'true' || decodedValue === '1') as T;
+              return (value === 'true' || value === '1') as T;
             case 'bigint':
-              return BigInt(decodedValue) as T;
+              return BigInt(value) as T;
           }
         } catch {
           // If casting fails, return fallback or undefined or throw based on strict mode
           if (options.strict) {
-            throw new StateInvalidCast(decodedValue, options.cast);
+            throw new StateInvalidCast(value, options.cast);
           }
           return options.fallback !== undefined ? options.fallback : undefined;
         }
       }
 
       // If no casting and parsing failed, return the raw string value
-      return decodedValue as T;
+      return value as T;
     }
   }
 
@@ -120,45 +106,32 @@ export class CookieState extends Observer {
 
     let cookieString = `${key}=${encodedValue}`;
 
-    // Always set path to '/' unless explicitly specified
-    const cookiePath = options?.path ?? '/';
-    cookieString += `; path=${cookiePath}`;
+    if (options) {
+      if (options.expires) {
+        const expiresDate = options.expires instanceof Date
+          ? options.expires
+          : new Date(Date.now() + options.expires * 24 * 60 * 60 * 1000);
+        cookieString += `; expires=${expiresDate.toUTCString()}`;
+      }
 
-    // Only set domain if explicitly provided (avoid issues with subdomain mismatches)
-    if (options?.domain) {
-      cookieString += `; domain=${options.domain}`;
-    }
+      if (options.maxAge !== undefined) {
+        cookieString += `; max-age=${options.maxAge}`;
+      }
 
-    // Set expires if provided
-    if (options?.expires) {
-      const expiresDate = options.expires instanceof Date
-        ? options.expires
-        : new Date(Date.now() + options.expires * 24 * 60 * 60 * 1000);
-      cookieString += `; expires=${expiresDate.toUTCString()}`;
-    }
+      if (options.domain) {
+        cookieString += `; domain=${options.domain}`;
+      }
 
-    // Set max-age if provided
-    if (options?.maxAge !== undefined) {
-      cookieString += `; max-age=${options.maxAge}`;
-    }
+      if (options.path) {
+        cookieString += `; path=${options.path}`;
+      }
 
-    // Set SameSite attribute (default to Lax for production safety)
-    if (options?.sameSite) {
-      cookieString += `; SameSite=${options.sameSite}`;
-    } else {
-      cookieString += `; SameSite=Lax`;
-    }
+      if (options.secure) {
+        cookieString += '; secure';
+      }
 
-    // Set Secure attribute if requested or required by SameSite=None
-    const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
-    if ((options?.secure === true) || (options?.sameSite === 'none')) {
-      cookieString += `; Secure`;
-      if (!isHttps) {
-        // Warn in development if trying to set Secure cookies on HTTP
-        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.warn('Setting Secure cookie on a non-HTTPS connection may not work in modern browsers.');
-        }
+      if (options.sameSite) {
+        cookieString += `; samesite=${options.sameSite}`;
       }
     }
 
