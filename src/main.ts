@@ -1,6 +1,4 @@
-export { LocalState } from "./modules/local/local";
-export { MemoryState } from "./modules/memory/memory";
-export { SessionState } from "./modules/session/session";
-export { CookieState } from "./modules/cookie/cookie";
-
-export type { IStrategyEvent, IStrategyOptions, IStrategy, ISupportedPrimitive } from "./types";
+export { LocalState } from "~/common/LocalState/LocalState";
+export { MemoryState } from "~/common/MemoryState/MemoryState";
+export { SessionState } from "~/common/SessionState/SessionState";
+export { CookieState } from "~/common/CookieState/CookieState";

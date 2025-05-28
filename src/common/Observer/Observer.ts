@@ -1,20 +1,20 @@
-import { type IStrategyEvent } from "@/types";
+import { type IStorageEventData } from "~/types.ts";
 import EventEmitter from "eventemitter3";
 
-export type EventCallback<Payload = any> = (event: IStrategyEvent<Payload>) => void;
+export type Callback<T = unknown> = (event: IStorageEventData<T>) => void;
 
 export class Observer {
   protected static readonly observer = new EventEmitter();
 
-  public static on<Payload = any>(event: string, callback: EventCallback<Payload>): void {
+  public static on<T = unknown>(event: string, callback: Callback<T>): void {
     this.observer.on(event, callback);
   }
 
-  public static once<Payload = any>(event: string, callback: EventCallback<Payload>): void {
+  public static once<T = unknown>(event: string, callback: Callback<T>): void {
     this.observer.once(event, callback);
   }
 
-  public static off(event: string, callback: EventCallback): void {
+  public static off<T = unknown>(event: string, callback: Callback<T>): void {
     this.observer.off(event, callback);
   }
 
@@ -32,5 +32,9 @@ export class Observer {
 
   public static eventNames(): (string | symbol)[] {
     return this.observer.eventNames();
+  }
+
+  public static emit<T = unknown>(event: string, data: IStorageEventData<T>): void {
+    this.observer.emit(event, data);
   }
 }
