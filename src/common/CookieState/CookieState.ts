@@ -42,7 +42,7 @@ export class CookieState extends Observer {
     }
 
     // Fix: Handle cookies with multiple '=' in value
-    const [cookieKey, ...valueParts] = cookie.trim().split('=');
+    const [_cookieKey, ...valueParts] = cookie.trim().split('=');
     const value = valueParts.join('='); // Rejoin in case value contains '='
     
     if (!value) {
