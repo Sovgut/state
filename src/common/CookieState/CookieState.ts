@@ -120,33 +120,45 @@ export class CookieState extends Observer {
 
     let cookieString = `${key}=${encodedValue}`;
 
-    // Set default path to root if not specified
-    const cookiePath = options?.path || '/';
+    // Always set path to '/' unless explicitly specified
+    const cookiePath = options?.path ?? '/';
     cookieString += `; path=${cookiePath}`;
 
-    if (options) {
-      if (options.expires) {
-        const expiresDate = options.expires instanceof Date
-          ? options.expires
-          : new Date(Date.now() + options.expires * 24 * 60 * 60 * 1000);
-        cookieString += `; expires=${expiresDate.toUTCString()}`;
-      }
+    // Only set domain if explicitly provided (avoid issues with subdomain mismatches)
+    if (options?.domain) {
+      cookieString += `; domain=${options.domain}`;
+    }
 
-      if (options.maxAge !== undefined) {
-        cookieString += `; max-age=${options.maxAge}`;
-      }
+    // Set expires if provided
+    if (options?.expires) {
+      const expiresDate = options.expires instanceof Date
+        ? options.expires
+        : new Date(Date.now() + options.expires * 24 * 60 * 60 * 1000);
+      cookieString += `; expires=${expiresDate.toUTCString()}`;
+    }
 
-      if (options.domain) {
-        cookieString += `; domain=${options.domain}`;
-      }
+    // Set max-age if provided
+    if (options?.maxAge !== undefined) {
+      cookieString += `; max-age=${options.maxAge}`;
+    }
 
-      // Only add secure flag if explicitly set to true
-      if (options.secure === true) {
-        cookieString += `; Secure`;  // Fix: Capitalize 'Secure'
-      }
+    // Set SameSite attribute (default to Lax for production safety)
+    if (options?.sameSite) {
+      cookieString += `; SameSite=${options.sameSite}`;
+    } else {
+      cookieString += `; SameSite=Lax`;
+    }
 
-      if (options.sameSite) {
-        cookieString += `; SameSite=${options.sameSite}`;  // Fix: Capitalize 'SameSite'
+    // Set Secure attribute if requested or required by SameSite=None
+    const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+    if ((options?.secure === true) || (options?.sameSite === 'none')) {
+      cookieString += `; Secure`;
+      if (!isHttps) {
+        // Warn in development if trying to set Secure cookies on HTTP
+        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.warn('Setting Secure cookie on a non-HTTPS connection may not work in modern browsers.');
+        }
       }
     }
 
