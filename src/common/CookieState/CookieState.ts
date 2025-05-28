@@ -29,7 +29,10 @@ export class CookieState extends Observer {
   static get<T = unknown>(key: string, options?: Options<T>): T | undefined;
   static get<T = unknown>(key: string, options: Options<T> = {}): T | undefined {
     const cookies = document.cookie.split(';');
-    const cookie = cookies.find(c => c.trim().startsWith(`${key}=`));
+    const cookie = cookies.find(c => {
+      const trimmed = c.trim();
+      return trimmed.startsWith(`${key}=`) || trimmed === key;
+    });
 
     if (!cookie) {
       if (options.strict) {
@@ -38,10 +41,21 @@ export class CookieState extends Observer {
       return options.fallback !== undefined ? options.fallback : undefined;
     }
 
-    const value = decodeURIComponent(cookie.split('=')[1]);
+    // Fix: Handle cookies with multiple '=' in value
+    const [cookieKey, ...valueParts] = cookie.trim().split('=');
+    const value = valueParts.join('='); // Rejoin in case value contains '='
+    
+    if (!value) {
+      if (options.strict) {
+        throw new StateDoesNotExist(key, 'cookies');
+      }
+      return options.fallback !== undefined ? options.fallback : undefined;
+    }
+
+    const decodedValue = decodeURIComponent(value);
 
     try {
-      let parsed = JSON.parse(value) as T;
+      let parsed = JSON.parse(decodedValue) as T;
 
       // Check for empty values when fallback is enabled
       if (options.fallback !== undefined &&
@@ -78,25 +92,25 @@ export class CookieState extends Observer {
         try {
           switch (options.cast) {
             case 'string':
-              return value as T;
+              return decodedValue as T;
             case 'number':
-              return Number(value) as T;
+              return Number(decodedValue) as T;
             case 'boolean':
-              return (value === 'true' || value === '1') as T;
+              return (decodedValue === 'true' || decodedValue === '1') as T;
             case 'bigint':
-              return BigInt(value) as T;
+              return BigInt(decodedValue) as T;
           }
         } catch {
           // If casting fails, return fallback or undefined or throw based on strict mode
           if (options.strict) {
-            throw new StateInvalidCast(value, options.cast);
+            throw new StateInvalidCast(decodedValue, options.cast);
           }
           return options.fallback !== undefined ? options.fallback : undefined;
         }
       }
 
       // If no casting and parsing failed, return the raw string value
-      return value as T;
+      return decodedValue as T;
     }
   }
 
@@ -128,12 +142,17 @@ export class CookieState extends Observer {
 
       // Only add secure flag if explicitly set to true
       if (options.secure === true) {
-        cookieString += '; secure';
+        cookieString += `; Secure`;  // Fix: Capitalize 'Secure'
       }
 
       if (options.sameSite) {
-        cookieString += `; samesite=${options.sameSite}`;
+        cookieString += `; SameSite=${options.sameSite}`;  // Fix: Capitalize 'SameSite'
       }
+    }
+
+    // Debug: Log cookie string in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Setting cookie: ${cookieString}`);
     }
 
     document.cookie = cookieString;
