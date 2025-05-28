@@ -106,6 +106,10 @@ export class CookieState extends Observer {
 
     let cookieString = `${key}=${encodedValue}`;
 
+    // Set default path to root if not specified
+    const cookiePath = options?.path || '/';
+    cookieString += `; path=${cookiePath}`;
+
     if (options) {
       if (options.expires) {
         const expiresDate = options.expires instanceof Date
@@ -122,11 +126,8 @@ export class CookieState extends Observer {
         cookieString += `; domain=${options.domain}`;
       }
 
-      if (options.path) {
-        cookieString += `; path=${options.path}`;
-      }
-
-      if (options.secure) {
+      // Only add secure flag if explicitly set to true
+      if (options.secure === true) {
         cookieString += '; secure';
       }
 
