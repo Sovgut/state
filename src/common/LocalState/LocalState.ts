@@ -71,7 +71,7 @@ export class LocalState extends Observer {
         } catch {
           // If casting fails, return fallback or undefined or throw based on strict mode
           if (options.strict) {
-            throw new StateInvalidCast(item, options.cast);
+            throw new StateInvalidCast(key, 'localStorage', item, options.cast);
           }
           return options.fallback !== undefined ? options.fallback : undefined;
         }

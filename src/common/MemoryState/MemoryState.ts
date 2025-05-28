@@ -49,7 +49,7 @@ export class MemoryState extends Observer {
         }
       } catch {
         if (options.strict) {
-          throw new StateInvalidCast(String(value), options.cast);
+          throw new StateInvalidCast(key, 'memory', value, options.cast);
         }
         return options.fallback !== undefined ? options.fallback : undefined;
       }
