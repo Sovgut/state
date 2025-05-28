@@ -16,6 +16,8 @@ export default defineConfig({
         "**/*.spec.ts",
         "**/*.spec.tsx",
       ],
+      outDir: "dist", // Ensure types are output to dist
+      entryRoot: "src",  // Ensure correct root for types
     }),
   ],
   build: {

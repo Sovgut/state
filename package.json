@@ -1,6 +1,6 @@
 {
   "name": "@sovgut/state",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "type": "module",
   "repository": {
     "type": "git",
@@ -52,7 +52,8 @@
   "module": "./dist/main.js",
   "exports": {
     ".": {
-      "import": "./dist/main.js"
+      "import": "./dist/main.js",
+      "types": "./dist/main.d.ts"
     }
   }
 }
