@@ -43,7 +43,6 @@ export class CookieState extends Observer {
     try {
       let parsed = JSON.parse(value) as T;
 
-      // Check for empty values when fallback is enabled
       if (options.fallback !== undefined &&
         (parsed === null ||
           parsed === undefined ||
@@ -53,7 +52,6 @@ export class CookieState extends Observer {
         return options.fallback;
       }
 
-      // Apply casting if specified
       if (options.cast) {
         switch (options.cast) {
           case 'string':
@@ -73,7 +71,6 @@ export class CookieState extends Observer {
 
       return parsed;
     } catch {
-      // If parsing fails, try to cast the raw string value if cast option is specified
       if (options.cast) {
         try {
           switch (options.cast) {
@@ -87,7 +84,6 @@ export class CookieState extends Observer {
               return BigInt(value) as T;
           }
         } catch {
-          // If casting fails, return fallback or undefined or throw based on strict mode
           if (options.strict) {
             throw new StateInvalidCast(key, 'cookies', value, options.cast);
           }
@@ -95,7 +91,6 @@ export class CookieState extends Observer {
         }
       }
 
-      // If no casting and parsing failed, return the raw string value
       return value as T;
     }
   }

@@ -3,7 +3,6 @@ import { CookieState } from './CookieState.ts';
 import { StateDoesNotExist } from '~/errors/StateDoesNotExist.ts';
 import { StateInvalidCast } from '~/errors/StateInvalidCast.ts';
 
-// Mock document.cookie
 let cookieStore: Record<string, string> = {};
 
 Object.defineProperty(document, 'cookie', {
@@ -25,14 +24,11 @@ Object.defineProperty(document, 'cookie', {
 
 describe('Cookie', () => {
   beforeEach(() => {
-    // Clear cookies before each test
     cookieStore = {};
-    // Clear any observers
     CookieState.removeAllListeners();
   });
 
   afterEach(() => {
-    // Clean up after each test
     cookieStore = {};
     CookieState.removeAllListeners();
   });
@@ -69,13 +65,13 @@ describe('Cookie', () => {
     });
 
     it('should set cookie with expires option (Date)', () => {
-      const expires = new Date(Date.now() + 86400000); // 1 day from now
+      const expires = new Date(Date.now() + 86400000);
       CookieState.set('temp', 'value', { expires });
       expect(cookieStore.temp).toBe(encodeURIComponent('"value"'));
     });
 
     it('should set cookie with expires option (number of days)', () => {
-      CookieState.set('temp', 'value', { expires: 7 }); // 7 days
+      CookieState.set('temp', 'value', { expires: 7 });
       expect(cookieStore.temp).toBe(encodeURIComponent('"value"'));
     });
 

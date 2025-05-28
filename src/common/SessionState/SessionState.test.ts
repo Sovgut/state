@@ -5,14 +5,11 @@ import { StateInvalidCast } from '~/errors/StateInvalidCast.ts';
 
 describe('Session', () => {
   beforeEach(() => {
-    // Clear sessionStorage before each test
     sessionStorage.clear();
-    // Clear any observers
     SessionState.removeAllListeners();
   });
 
   afterEach(() => {
-    // Clean up after each test
     sessionStorage.clear();
     SessionState.removeAllListeners();
   });

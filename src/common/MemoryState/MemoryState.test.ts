@@ -5,14 +5,11 @@ import { StateInvalidCast } from '~/errors/StateInvalidCast.ts';
 
 describe('Memory', () => {
   beforeEach(() => {
-    // Clear memory storage before each test
     MemoryState.clear();
-    // Clear any observers
     MemoryState.removeAllListeners();
   });
 
   afterEach(() => {
-    // Clean up after each test
     MemoryState.clear();
     MemoryState.removeAllListeners();
   });

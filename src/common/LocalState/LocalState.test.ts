@@ -5,14 +5,11 @@ import { StateInvalidCast } from '~/errors/StateInvalidCast.ts';
 
 describe('Local', () => {
   beforeEach(() => {
-    // Clear localStorage before each test
     localStorage.clear();
-    // Clear any observers
     LocalState.removeAllListeners();
   });
 
   afterEach(() => {
-    // Clean up after each test
     localStorage.clear();
     LocalState.removeAllListeners();
   });

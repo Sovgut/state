@@ -25,7 +25,6 @@ export class SessionState extends Observer {
     try {
       let parsed = JSON.parse(item) as T;
 
-      // Check for empty values when fallback is enabled
       if (options.fallback !== undefined &&
         (parsed === null ||
           parsed === undefined ||
@@ -35,7 +34,6 @@ export class SessionState extends Observer {
         return options.fallback;
       }
 
-      // Apply casting if specified
       if (options.cast) {
         switch (options.cast) {
           case 'string':
@@ -55,7 +53,6 @@ export class SessionState extends Observer {
 
       return parsed;
     } catch {
-      // If parsing fails, try to cast the raw string value if cast option is specified
       if (options.cast) {
         try {
           switch (options.cast) {
@@ -69,7 +66,6 @@ export class SessionState extends Observer {
               return BigInt(item) as T;
           }
         } catch {
-          // If casting fails, return fallback or undefined or throw based on strict mode
           if (options.strict) {
             throw new StateInvalidCast(key, 'sessionStorage', item, options.cast);
           }
@@ -77,7 +73,6 @@ export class SessionState extends Observer {
         }
       }
 
-      // If no casting and parsing failed, return the raw string value
       return item as T;
     }
   }

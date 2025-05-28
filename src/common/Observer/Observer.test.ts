@@ -4,12 +4,10 @@ import type { Callback } from './Observer.ts';
 
 describe('Observer', () => {
     beforeEach(() => {
-        // Clear all listeners before each test
         Observer.removeAllListeners();
     });
 
     afterEach(() => {
-        // Clean up after each test
         Observer.removeAllListeners();
     });
 

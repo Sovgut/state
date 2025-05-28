@@ -24,7 +24,6 @@ export class MemoryState extends Observer {
       return options.fallback !== undefined ? options.fallback : undefined;
     }
 
-    // Check for empty values when fallback is enabled
     if (options.fallback !== undefined &&
       (value === null ||
         value === undefined ||
@@ -34,7 +33,6 @@ export class MemoryState extends Observer {
       return options.fallback;
     }
 
-    // Apply casting if specified
     if (options.cast) {
       try {
         switch (options.cast) {
