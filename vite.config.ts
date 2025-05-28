@@ -16,8 +16,8 @@ export default defineConfig({
         "**/*.spec.ts",
         "**/*.spec.tsx",
       ],
-      outDir: "dist", // Ensure types are output to dist
-      entryRoot: "src",  // Ensure correct root for types
+      outDir: "dist",
+      entryRoot: "src",
     }),
   ],
   build: {
@@ -29,9 +29,6 @@ export default defineConfig({
       entry: resolve("src", "main.ts"),
       formats: ["es"],
     },
-  },
-  optimizeDeps: {
-    include: ["eventemitter3"],
   },
   resolve: {
     alias: {

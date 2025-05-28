@@ -1,40 +1,58 @@
 import { type IStorageEventData } from "~/types.ts";
-import EventEmitter from "eventemitter3";
 
 export type Callback<T = unknown> = (event: IStorageEventData<T>) => void;
 
 export class Observer {
-  protected static readonly observer = new EventEmitter();
+  private static events: Map<string | symbol, Set<Callback>> = new Map();
+  private static onceEvents: Map<string | symbol, Set<Callback>> = new Map();
 
   public static on<T = unknown>(event: string, callback: Callback<T>): void {
-    this.observer.on(event, callback);
+    if (!Observer.events.has(event)) {
+      Observer.events.set(event, new Set());
+    }
+    Observer.events.get(event)!.add(callback as Callback);
   }
 
   public static once<T = unknown>(event: string, callback: Callback<T>): void {
-    this.observer.once(event, callback);
+    if (!Observer.onceEvents.has(event)) {
+      Observer.onceEvents.set(event, new Set());
+    }
+    Observer.onceEvents.get(event)!.add(callback as Callback);
   }
 
   public static off<T = unknown>(event: string, callback: Callback<T>): void {
-    this.observer.off(event, callback);
-  }
-
-  public static removeAllListeners(): void {
-    this.observer.removeAllListeners();
-  }
-
-  public static listenerCount(event: string): number {
-    return this.observer.listenerCount(event);
-  }
-
-  public static removeListener(event: string): void {
-    this.observer.removeListener(event);
-  }
-
-  public static eventNames(): (string | symbol)[] {
-    return this.observer.eventNames();
+    Observer.events.get(event)?.delete(callback as Callback);
+    Observer.onceEvents.get(event)?.delete(callback as Callback);
   }
 
   public static emit<T = unknown>(event: string, data: IStorageEventData<T>): void {
-    this.observer.emit(event, data);
+    Observer.events.get(event)?.forEach(listener => listener(data));
+    
+    const onceListeners = Observer.onceEvents.get(event);
+    if (onceListeners) {
+      onceListeners.forEach(listener => listener(data));
+      Observer.onceEvents.delete(event);
+    }
+  }
+
+  public static removeAllListeners(): void {
+    Observer.events.clear();
+    Observer.onceEvents.clear();
+  }
+
+  public static removeListener(event: string): void {
+    Observer.events.delete(event);
+    Observer.onceEvents.delete(event);
+  }
+
+  public static listenerCount(event: string): number {
+    const regular = Observer.events.get(event)?.size || 0;
+    const once = Observer.onceEvents.get(event)?.size || 0;
+    return regular + once;
+  }
+
+  public static eventNames(): (string | symbol)[] {
+    const names = new Set([...Observer.events.keys(), ...Observer.onceEvents.keys()]);
+    return Array.from(names);
   }
 }
