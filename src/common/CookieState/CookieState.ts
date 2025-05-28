@@ -2,12 +2,22 @@ import { Observer } from "~/common/Observer/Observer.ts";
 import { StateDoesNotExist } from "~/errors/StateDoesNotExist.ts";
 import { StateInvalidCast } from "~/errors/StateInvalidCast.ts";
 
+/**
+ * Configuration options for retrieving values from state
+ * @template T - The expected type of the value
+ */
 type Options<T = unknown> = {
+  /** If true, throws an error when the key doesn't exist */
   strict?: boolean;
+  /** Default value to return when the key doesn't exist or has an empty value */
   fallback?: T;
+  /** Cast the value to a specific type */
   cast?: 'string' | 'number' | 'boolean' | 'bigint';
 }
 
+/**
+ * Configuration options for setting cookies
+ */
 type CookieOptions = {
   /** Cookie expiration date or number of days from now */
   expires?: Date | number;
@@ -23,9 +33,37 @@ type CookieOptions = {
   sameSite?: 'strict' | 'lax' | 'none';
 }
 
+/**
+ * Cookie-based state management class that persists data using browser cookies.
+ * Data persists based on cookie expiration settings and is accessible across subdomains.
+ * Extends Observer to provide event emission capabilities.
+ */
 export class CookieState extends Observer {
+  /**
+   * Retrieves a value from cookies with strict type checking
+   * @template T - The expected type of the value
+   * @param key - The key to retrieve
+   * @param options - Options with strict mode enabled
+   * @returns The value associated with the key
+   * @throws {StateDoesNotExist} When the key doesn't exist
+   * @throws {StateInvalidCast} When casting fails in strict mode
+   */
   static get<T = unknown>(key: string, options: Options<T> & { strict: true }): T;
+  /**
+   * Retrieves a value from cookies with a fallback
+   * @template T - The expected type of the value
+   * @param key - The key to retrieve
+   * @param options - Options with a fallback value
+   * @returns The value associated with the key or the fallback
+   */
   static get<T = unknown>(key: string, options: Options<T> & { fallback: T }): T;
+  /**
+   * Retrieves a value from cookies
+   * @template T - The expected type of the value
+   * @param key - The key to retrieve
+   * @param options - Optional configuration
+   * @returns The value associated with the key or undefined
+   */
   static get<T = unknown>(key: string, options?: Options<T>): T | undefined;
   static get<T = unknown>(key: string, options: Options<T> = {}): T | undefined {
     const cookies = document.cookie.split(';');
@@ -95,6 +133,14 @@ export class CookieState extends Observer {
     }
   }
 
+  /**
+   * Stores a value in cookies
+   * @template T - The type of the value to store
+   * @param key - The key to store the value under
+   * @param value - The value to store (will be JSON stringified and URI encoded)
+   * @param options - Cookie configuration options
+   * @emits Will emit an event with the key and new value
+   */
   static set<T = unknown>(key: string, value: T, options?: CookieOptions): void {
     const serialized = JSON.stringify(value);
     const encodedValue = encodeURIComponent(serialized);
@@ -134,11 +180,20 @@ export class CookieState extends Observer {
     CookieState.emit(key, value);
   }
 
+  /**
+   * Removes a cookie
+   * @param key - The key of the cookie to remove
+   * @emits Will emit an event with the key and null value
+   */
   static remove(key: string): void {
     document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
     CookieState.emit(key, null);
   }
 
+  /**
+   * Clears all cookies accessible to the current document
+   * @emits Will emit an event for each removed cookie with null value
+   */
   static clear(): void {
     const cookies = document.cookie.split(';');
     cookies.forEach(cookie => {
@@ -151,6 +206,11 @@ export class CookieState extends Observer {
     });
   }
 
+  /**
+   * Checks if a cookie exists
+   * @param key - The key to check
+   * @returns True if the cookie exists, false otherwise
+   */
   static has(key: string): boolean {
     return document.cookie.split(';').some(c => c.trim().startsWith(`${key}=`));
   }
