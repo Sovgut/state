@@ -437,7 +437,7 @@ try {
   const num = LocalState.get("invalid", { cast: "number", strict: true });
 } catch (error) {
   if (error instanceof StateInvalidCast) {
-    console.error(`Cannot cast "${error.value}" to ${error.type}`);
+    console.error(`Cannot cast "${error.value}" to ${error.type} for key "${error.key}" in ${error.storage}`);
   }
 }
 ```
