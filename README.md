@@ -20,7 +20,7 @@
 - **📦 TypeScript First** - Full TypeScript support with intelligent type inference
 - **🔄 Reactive Updates** - Built-in observer pattern for real-time state synchronization
 - **🛡️ Type Safety** - Automatic type casting and validation with custom error handling
-- **🪶 Lightweight** - Minimal bundle size
+- **🪶 Lightweight** - Minimal bundle size (10kb)
 - **🔧 Flexible Configuration** - Fallback values, strict mode, and custom casting options
 - **🍪 Advanced Cookie Support** - Full cookie options including SameSite, Secure, and expiration
 
