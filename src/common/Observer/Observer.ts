@@ -1,131 +1,144 @@
 import { type IStorageEventData } from "~/types.ts";
 
 /**
- * Callback function type for event listeners
+ * Callback function type for event listeners.
  * @template T - The type of data passed to the callback
  */
 export type Callback<T = unknown> = (event: IStorageEventData<T>) => void;
 
+type Registry = {
+  events: Map<string, Set<Callback>>;
+  onceEvents: Map<string, Set<Callback>>;
+};
+
 /**
- * Base observer class that provides event emitter functionality for state management classes.
- * Uses a registry pattern to maintain separate event systems for each inheriting class.
+ * Base observer class providing event-emitter functionality for state classes.
+ * Each subclass gets its own isolated event registry, so LocalState listeners
+ * don't fire on SessionState events and vice-versa.
  */
 export class Observer {
-  private static eventRegistry = new Map<Function, {
-    events: Map<string | symbol, Set<Callback>>,
-    onceEvents: Map<string | symbol, Set<Callback>>
-  }>();
+  // WeakMap lets dynamically-created subclasses be garbage-collected
+  // along with their listener registries.
+  private static eventRegistry = new WeakMap<Function, Registry>();
 
-  /**
-   * Gets or creates the event registry for a specific class
-   * @param target - The class constructor function
-   * @returns The event registry for the target class
-   */
-  private static getRegistry(target: Function) {
-    if (!Observer.eventRegistry.has(target)) {
-      Observer.eventRegistry.set(target, {
-        events: new Map(),
-        onceEvents: new Map()
-      });
+  private static getRegistry(target: Function): Registry {
+    let reg = Observer.eventRegistry.get(target);
+    if (!reg) {
+      reg = { events: new Map(), onceEvents: new Map() };
+      Observer.eventRegistry.set(target, reg);
     }
-    return Observer.eventRegistry.get(target)!;
+    return reg;
   }
 
   /**
-   * Adds an event listener for the specified event
-   * @template T - The type of data passed to the callback
-   * @param event - The name of the event to listen for
-   * @param callback - The callback function to execute when the event is emitted
+   * Adds an event listener for the specified event.
    */
   public static on<T = unknown>(event: string, callback: Callback<T>): void {
-    const registry = Observer.getRegistry(this);
-    if (!registry.events.has(event)) {
-      registry.events.set(event, new Set());
+    const reg = Observer.getRegistry(this);
+    let set = reg.events.get(event);
+    if (!set) {
+      set = new Set();
+      reg.events.set(event, set);
     }
-    registry.events.get(event)!.add(callback as Callback);
+    set.add(callback as Callback);
   }
 
   /**
-   * Adds a one-time event listener for the specified event
-   * @template T - The type of data passed to the callback
-   * @param event - The name of the event to listen for
-   * @param callback - The callback function to execute once when the event is emitted
+   * Adds a one-time event listener that fires at most once and is then removed.
    */
   public static once<T = unknown>(event: string, callback: Callback<T>): void {
-    const registry = Observer.getRegistry(this);
-    if (!registry.onceEvents.has(event)) {
-      registry.onceEvents.set(event, new Set());
+    const reg = Observer.getRegistry(this);
+    let set = reg.onceEvents.get(event);
+    if (!set) {
+      set = new Set();
+      reg.onceEvents.set(event, set);
     }
-    registry.onceEvents.get(event)!.add(callback as Callback);
+    set.add(callback as Callback);
   }
 
   /**
-   * Removes an event listener for the specified event
-   * @template T - The type of data passed to the callback
-   * @param event - The name of the event
-   * @param callback - The callback function to remove
+   * Removes a specific listener (from both regular and once registries).
    */
   public static off<T = unknown>(event: string, callback: Callback<T>): void {
-    const registry = Observer.getRegistry(this);
-    registry.events.get(event)?.delete(callback as Callback);
-    registry.onceEvents.get(event)?.delete(callback as Callback);
+    const reg = Observer.getRegistry(this);
+    reg.events.get(event)?.delete(callback as Callback);
+    reg.onceEvents.get(event)?.delete(callback as Callback);
   }
 
   /**
-   * Emits an event with the given data to all registered listeners
-   * @template T - The type of data being emitted
-   * @param event - The name of the event to emit
-   * @param data - The data to pass to the event listeners
+   * Emits an event to all registered listeners.
+   *
+   * Guarantees:
+   *  - A throwing listener never blocks other listeners.
+   *  - A throwing listener never propagates the error into the caller of `set/remove/clear`.
+   *  - Mutating listener sets during emission is safe (iteration uses a snapshot).
+   *  - A recursive `emit` from inside a `once` callback will NOT re-fire the same once-listeners.
    */
   public static emit<T = unknown>(event: string, data: IStorageEventData<T>): void {
-    const registry = Observer.getRegistry(this);
-    registry.events.get(event)?.forEach(listener => listener(data));
-    
-    const onceListeners = registry.onceEvents.get(event);
-    if (onceListeners) {
-      onceListeners.forEach(listener => listener(data));
-      registry.onceEvents.delete(event);
+    const reg = Observer.getRegistry(this);
+
+    const regular = reg.events.get(event);
+    if (regular && regular.size > 0) {
+      const snapshot = Array.from(regular);
+      for (const listener of snapshot) {
+        try {
+          listener(data);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(`[Observer] listener for "${event}" threw:`, err);
+        }
+      }
+    }
+
+    const once = reg.onceEvents.get(event);
+    if (once && once.size > 0) {
+      const snapshot = Array.from(once);
+      // Delete BEFORE invoking. If a callback re-emits the same event,
+      // these once-listeners must not fire again.
+      reg.onceEvents.delete(event);
+      for (const listener of snapshot) {
+        try {
+          listener(data);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(`[Observer] once-listener for "${event}" threw:`, err);
+        }
+      }
     }
   }
 
   /**
-   * Removes all event listeners for all events
+   * Removes every listener for every event on this class.
    */
   public static removeAllListeners(): void {
-    const registry = Observer.getRegistry(this);
-    registry.events.clear();
-    registry.onceEvents.clear();
+    const reg = Observer.getRegistry(this);
+    reg.events.clear();
+    reg.onceEvents.clear();
   }
 
   /**
-   * Removes all listeners for a specific event
-   * @param event - The name of the event
+   * Removes every listener for a single event.
    */
   public static removeListener(event: string): void {
-    const registry = Observer.getRegistry(this);
-    registry.events.delete(event);
-    registry.onceEvents.delete(event);
+    const reg = Observer.getRegistry(this);
+    reg.events.delete(event);
+    reg.onceEvents.delete(event);
   }
 
   /**
-   * Gets the number of listeners for a specific event
-   * @param event - The name of the event
-   * @returns The total number of listeners (regular + once)
+   * Total number of listeners (regular + once) for an event.
    */
   public static listenerCount(event: string): number {
-    const registry = Observer.getRegistry(this);
-    const regular = registry.events.get(event)?.size || 0;
-    const once = registry.onceEvents.get(event)?.size || 0;
-    return regular + once;
+    const reg = Observer.getRegistry(this);
+    return (reg.events.get(event)?.size ?? 0) + (reg.onceEvents.get(event)?.size ?? 0);
   }
 
   /**
-   * Gets an array of all event names that have listeners
-   * @returns Array of event names
+   * All event names with at least one listener.
    */
-  public static eventNames(): (string | symbol)[] {
-    const registry = Observer.getRegistry(this);
-    const names = new Set([...registry.events.keys(), ...registry.onceEvents.keys()]);
+  public static eventNames(): string[] {
+    const reg = Observer.getRegistry(this);
+    const names = new Set<string>([...reg.events.keys(), ...reg.onceEvents.keys()]);
     return Array.from(names);
   }
 }

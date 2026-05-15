@@ -1,157 +1,137 @@
 import { Observer } from "~/common/Observer/Observer.ts";
-import { StateDoesNotExist } from "~/errors/StateDoesNotExist.ts";
-import { StateInvalidCast } from "~/errors/StateInvalidCast.ts";
+import { resolveValue, type Options } from "~/common/internal/resolveValue.ts";
+import { hasLocalStorage } from "~/common/internal/env.ts";
+
+const STORAGE_NAME = "localStorage";
 
 /**
- * Configuration options for retrieving values from state
- * @template T - The expected type of the value
- */
-type Options<T = unknown> = {
-  /** If true, throws an error when the key doesn't exist */
-  strict?: boolean;
-  /** Default value to return when the key doesn't exist or has an empty value */
-  fallback?: T;
-  /** Cast the value to a specific type */
-  cast?: 'string' | 'number' | 'boolean' | 'bigint';
-}
-
-/**
- * Local storage state management class that persists data using the browser's localStorage API.
+ * Local-storage-backed state management.
  * Data persists across browser sessions until explicitly cleared.
- * Extends Observer to provide event emission capabilities.
  */
 export class LocalState extends Observer {
-  /**
-   * Retrieves a value from local storage with strict type checking
-   * @template T - The expected type of the value
-   * @param key - The key to retrieve
-   * @param options - Options with strict mode enabled
-   * @returns The value associated with the key
-   * @throws {StateDoesNotExist} When the key doesn't exist
-   * @throws {StateInvalidCast} When casting fails in strict mode
-   */
   static get<T = unknown>(key: string, options: Options<T> & { strict: true }): T;
-  /**
-   * Retrieves a value from local storage with a fallback
-   * @template T - The expected type of the value
-   * @param key - The key to retrieve
-   * @param options - Options with a fallback value
-   * @returns The value associated with the key or the fallback
-   */
   static get<T = unknown>(key: string, options: Options<T> & { fallback: T }): T;
-  /**
-   * Retrieves a value from local storage
-   * @template T - The expected type of the value
-   * @param key - The key to retrieve
-   * @param options - Optional configuration
-   * @returns The value associated with the key or undefined
-   */
   static get<T = unknown>(key: string, options?: Options<T>): T | undefined;
   static get<T = unknown>(key: string, options: Options<T> = {}): T | undefined {
-    const item = localStorage.getItem(key);
-
-    if (item === null) {
-      if (options.strict) {
-        throw new StateDoesNotExist(key, 'localStorage');
-      }
-      return options.fallback !== undefined ? options.fallback : undefined;
+    if (!hasLocalStorage()) {
+      return resolveValue<T>({ found: false }, options, STORAGE_NAME, key);
     }
 
+    let raw: string | null;
     try {
-      let parsed = JSON.parse(item) as T;
-
-      if (options.fallback !== undefined &&
-        (parsed === null ||
-          parsed === undefined ||
-          parsed === '' ||
-          (Array.isArray(parsed) && parsed.length === 0) ||
-          (typeof parsed === 'object' && Object.keys(parsed).length === 0))) {
-        return options.fallback;
-      }
-
-      if (options.cast) {
-        switch (options.cast) {
-          case 'string':
-            parsed = String(parsed) as T;
-            break;
-          case 'number':
-            parsed = Number(parsed) as T;
-            break;
-          case 'boolean':
-            parsed = Boolean(parsed) as T;
-            break;
-          case 'bigint':
-            parsed = BigInt(String(parsed)) as T;
-            break;
-        }
-      }
-
-      return parsed;
+      raw = localStorage.getItem(key);
     } catch {
-      if (options.cast) {
-        try {
-          switch (options.cast) {
-            case 'string':
-              return item as T;
-            case 'number':
-              return Number(item) as T;
-            case 'boolean':
-              return (item === 'true' || item === '1') as T;
-            case 'bigint':
-              return BigInt(item) as T;
-          }
-        } catch {
-          if (options.strict) {
-            throw new StateInvalidCast(key, 'localStorage', item, options.cast);
-          }
-          return options.fallback !== undefined ? options.fallback : undefined;
-        }
-      }
-
-      return item as T;
+      // SecurityError (private mode, disabled storage, sandboxed iframe)
+      return resolveValue<T>({ found: false }, options, STORAGE_NAME, key);
     }
+
+    if (raw === null) {
+      return resolveValue<T>({ found: false }, options, STORAGE_NAME, key);
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      // Value was written by something other than this library (legacy/foreign).
+      // Surface it as the raw string rather than crashing.
+      parsed = raw;
+    }
+
+    return resolveValue<T>({ found: true, value: parsed }, options, STORAGE_NAME, key);
   }
 
   /**
-   * Stores a value in local storage
-   * @template T - The type of the value to store
-   * @param key - The key to store the value under
-   * @param value - The value to store (will be JSON stringified)
-   * @emits Will emit an event with the key and new value
+   * Stores a value in local storage.
+   *
+   * Always JSON-serialises. This is a deliberate change from the previous
+   * implementation, which stored strings raw — that caused values like
+   * `"42"` or `"true"` to come back as `42` and `true` after a roundtrip.
+   *
+   * @throws when the value cannot be serialised (circular refs, functions,
+   *         symbols, undefined) or when localStorage refuses the write
+   *         (QuotaExceededError, SecurityError).
    */
   static set<T = unknown>(key: string, value: T): void {
-    const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-    localStorage.setItem(key, serialized);
+    if (!hasLocalStorage()) {
+      throw new Error("localStorage is not available in this environment.");
+    }
+
+    let serialized: string | undefined;
+    try {
+      serialized = JSON.stringify(value);
+    } catch (err) {
+      throw new Error(
+        `Cannot serialize value for key "${key}" in ${STORAGE_NAME}: ${(err as Error).message}`,
+      );
+    }
+
+    if (serialized === undefined) {
+      throw new Error(
+        `Cannot store value for key "${key}" in ${STORAGE_NAME}: value is not serializable (undefined, function, or symbol).`,
+      );
+    }
+
+    try {
+      localStorage.setItem(key, serialized);
+    } catch (err) {
+      // QuotaExceededError, SecurityError — preserve original error for diagnostics
+      throw err;
+    }
+
     LocalState.emit(key, value);
   }
 
   /**
-   * Removes a value from local storage
-   * @param key - The key to remove
-   * @emits Will emit an event with the key and null value
+   * Removes a value from local storage.
    */
   static remove(key: string): void {
-    localStorage.removeItem(key);
+    if (!hasLocalStorage()) return;
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // ignore — best-effort
+    }
     LocalState.emit(key, null);
   }
 
   /**
-   * Clears all values from local storage
-   * @emits Will emit an event for each removed key with null value
+   * Clears every value in local storage and emits a `null` event for each removed key.
    */
   static clear(): void {
-    Object.keys(localStorage).forEach(key => {
-      localStorage.removeItem(key);
-      LocalState.emit(key, null);
-    });
+    if (!hasLocalStorage()) return;
+
+    let keys: string[];
+    try {
+      keys = Object.keys(localStorage);
+    } catch {
+      return;
+    }
+
+    try {
+      localStorage.clear();
+    } catch {
+      // Fallback: remove keys one by one if `clear()` is blocked
+      for (const k of keys) {
+        try {
+          localStorage.removeItem(k);
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    for (const k of keys) {
+      LocalState.emit(k, null);
+    }
   }
 
-  /**
-   * Checks if a key exists in local storage
-   * @param key - The key to check
-   * @returns True if the key exists, false otherwise
-   */
   static has(key: string): boolean {
-    return localStorage.getItem(key) !== null;
+    if (!hasLocalStorage()) return false;
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch {
+      return false;
+    }
   }
 }
