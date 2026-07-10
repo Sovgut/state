@@ -1,36 +1,69 @@
+# Primary include is package.json "files": ["dist"]; this denylist is a
+# defense-in-depth backup so nothing outside dist can leak into the tarball.
+# Note: npm always publishes package.json, README, LICENSE, and the "main"
+# file regardless of what is listed here.
+
+# Source & tests
+src
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Build & type-check config
+tsconfig*.json
+vite.config.*
+vitest.config.*
+biome.json
+biome.jsonc
+.editorconfig
+
+# Tooling, editors & CI
+.github
+.gitignore
+.npmignore
+.zed
+.vscode
+.idea
+.claude
+
+# Dependencies & lockfiles
+node_modules
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+pnpm-lock.yaml
+
+# Caches & build metadata
+*.tsbuildinfo
+.cache
+.temp
+.tmp
+.turbo
+.vite
+.rollup.cache
+
+# Tests & coverage
+coverage
+*.lcov
+.nyc_output
+test-results
+playwright-report
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist-ssr
+# Environment variables
+.env
+.env.*
+
+# OS & packaging artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tgz
 *.local
-src
-
-# Coverage
-coverage
-
-# Editor directories and files
-.vscode
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-package-lock.json
-vite.config.ts
-tsconfig.json
-.gitignore
-README.md
-LICENSE
-.github
-.DS_Store
-.zed
-.claude

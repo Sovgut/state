@@ -1,3 +1,40 @@
+# Dependencies
+node_modules
+jspm_packages
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnpm-store
+
+# Build output
+dist
+dist-ssr
+build
+lib
+out
+
+# Caches & build metadata
+.cache
+.temp
+.tmp
+.turbo
+.vite
+.rollup.cache
+.eslintcache
+*.tsbuildinfo
+
+# Tests & coverage
+coverage
+*.lcov
+.nyc_output
+test-results
+playwright-report
+
 # Logs
 logs
 *.log
@@ -6,23 +43,38 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.pnpm-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment variables
+.env
+.env.*
+!.env.example
 
-# Coverage
-coverage
-
-# Editor directories and files
+# Editor & IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Packaging
+*.tgz
+
+# Local & tooling
+*.local
 .claude
