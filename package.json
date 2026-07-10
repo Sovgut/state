@@ -1,57 +1,86 @@
 {
   "name": "@sovgut/state",
-  "version": "2.1.13",
+  "version": "2.2.0",
+  "description": "Type-safe, synchronous state management for the browser with a unified API over localStorage, sessionStorage, cookies, and in-memory storage, plus a built-in observer for change events.",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Sovgut/state.git"
+  },
+  "homepage": "https://github.com/Sovgut/state#readme",
+  "bugs": {
+    "url": "https://github.com/Sovgut/state/issues"
   },
   "author": {
     "name": "Serhii Sovhut",
     "url": "https://github.com/Sovgut"
   },
   "keywords": [
-    "state management",
-    "typescript",
-    "javascript",
+    "state",
+    "store",
+    "state-management",
+    "storage",
+    "web-storage",
     "localstorage",
+    "local-storage",
     "sessionstorage",
+    "session-storage",
     "cookies",
-    "in-memory storage",
-    "observer pattern",
-    "event listeners",
-    "reactive state",
-    "state library",
-    "data storage",
-    "frontend",
-    "web development",
-    "synchronous storage",
-    "lightweight",
-    "flexible state management"
+    "cookie",
+    "in-memory",
+    "memory-storage",
+    "observer",
+    "pubsub",
+    "event-emitter",
+    "reactive",
+    "type-safe",
+    "typescript",
+    "browser",
+    "persistence",
+    "cache",
+    "react",
+    "frontend"
   ],
   "license": "MIT",
   "scripts": {
     "test": "vitest run",
-    "build": "tsc && vite build"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -b",
+    "build": "vite build",
+    "lint": "biome lint ./src",
+    "format": "biome format ./src --write",
+    "check": "biome check --write ./src",
+    "prepublishOnly": "npm run build",
+    "deploy:npm": "npm publish"
   },
   "devDependencies": {
-    "@types/node": "^22.15.23",
-    "jsdom": "^26.1.0",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5",
-    "vite-plugin-dts": "^4.5.4",
-    "vitest": "^3.1.4"
+    "@biomejs/biome": "^2.5.3",
+    "@types/node": "^26.1.1",
+    "@typescript/typescript6": "^6.0.2",
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.4",
+    "vite-plugin-dts": "^5.0.3",
+    "vitest": "^4.1.10"
   },
-  "files": [
-    "dist"
-  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist"],
   "main": "./dist/main.js",
-  "types": "./dist/main.d.ts",
   "module": "./dist/main.js",
+  "types": "./dist/main.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/main.d.ts",
       "import": "./dist/main.js",
-      "types": "./dist/main.d.ts"
-    }
+      "default": "./dist/main.js"
+    },
+    "./package.json": "./package.json"
   }
 }
