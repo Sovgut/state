@@ -1,30 +1,25 @@
 # @sovgut/state
 
-<p align="center">
-  <b>A lightweight, type-safe, and reactive state management library for modern web applications</b>
-</p>
+Type-safe, synchronous state management for the browser with a unified API over `localStorage`, `sessionStorage`, cookies, and in-memory storage. Each backend exposes the same interface and an isolated observer for change notifications.
 
-<p align="center">
-  <img src="https://img.shields.io/npm/v/@sovgut/state" alt="npm version" />
-  <img src="https://img.shields.io/npm/dm/@sovgut/state" alt="npm downloads" />
-  <img src="https://img.shields.io/github/license/sovgut/state" alt="license" />
-  <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
-</p>
+[![npm version](https://img.shields.io/npm/v/@sovgut/state)](https://www.npmjs.com/package/@sovgut/state)
+[![npm downloads](https://img.shields.io/npm/dm/@sovgut/state)](https://www.npmjs.com/package/@sovgut/state)
+[![license](https://img.shields.io/github/license/sovgut/state)](./LICENSE)
 
----
+## Contents
 
-## 🚀 Features
+- [Installation](#installation)
+- [Overview](#overview)
+- [Storage backends](#storage-backends)
+- [Reading and writing values](#reading-and-writing-values)
+- [Type casting](#type-casting)
+- [Observing changes](#observing-changes)
+- [React integration](#react-integration)
+- [API reference](#api-reference)
+- [Error handling](#error-handling)
+- [License](#license)
 
-- **🎯 Simple & Intuitive API** - Get started in minutes with a familiar localStorage-like API
-- **💾 Multiple Storage Strategies** - Choose between localStorage, sessionStorage, cookies, or in-memory storage
-- **📦 TypeScript First** - Full TypeScript support with intelligent type inference
-- **🔄 Reactive Updates** - Built-in observer pattern for real-time state synchronization
-- **🛡️ Type Safety** - Automatic type casting and validation with custom error handling
-- **🪶 Lightweight** - Minimal bundle size (10kb)
-- **🔧 Flexible Configuration** - Fallback values, strict mode, and custom casting options
-- **🍪 Advanced Cookie Support** - Full cookie options including SameSite, Secure, and expiration
-
-## 📦 Installation
+## Installation
 
 ```bash
 npm install @sovgut/state
@@ -38,37 +33,36 @@ yarn add @sovgut/state
 pnpm add @sovgut/state
 ```
 
-## 🎯 Quick Start
+The package ships as ES modules with bundled type declarations and has no runtime dependencies.
+
+## Overview
 
 ```typescript
-import { LocalState, SessionState, MemoryState, CookieState } from "@sovgut/state";
+import { LocalState } from "@sovgut/state";
 
-// Store a value
-LocalState.set("user", { name: "John", age: 30 });
+LocalState.set("user", { id: 1, name: "Alice" });
 
-// Retrieve a value
 const user = LocalState.get("user");
 
-// Listen for changes
-LocalState.on("user", (event) => {
-  console.log("User updated:", event);
+LocalState.on("user", (value) => {
+  console.log("user changed:", value);
 });
 ```
 
-## 📖 Table of Contents
+`LocalState`, `SessionState`, `MemoryState`, and `CookieState` are static classes. There is nothing to instantiate; import a backend and call its methods directly.
 
-- [Storage Strategies](#-storage-strategies)
-- [Basic Usage](#-basic-usage)
-- [Type Safety & Casting](#-type-safety--casting)
-- [Observer Pattern](#-observer-pattern)
-- [React Integration](#-react-integration)
-- [API Reference](#-api-reference)
-- [Error Handling](#-error-handling)
+## Storage backends
 
-## 💾 Storage Strategies
+All backends share the same core interface. They differ in where data is stored and how long it survives.
+
+| Backend        | Storage             | Lifetime                              |
+| -------------- | ------------------- | ------------------------------------- |
+| `LocalState`   | `localStorage`      | Persists across browser sessions      |
+| `SessionState` | `sessionStorage`    | Cleared when the tab is closed        |
+| `MemoryState`  | In-memory `Map`     | Cleared on page reload                |
+| `CookieState`  | `document.cookie`   | Configurable via cookie attributes    |
 
 ### LocalState
-Persists data in `localStorage` - survives browser restarts.
 
 ```typescript
 import { LocalState } from "@sovgut/state";
@@ -78,201 +72,161 @@ const theme = LocalState.get("theme"); // "dark"
 ```
 
 ### SessionState
-Stores data in `sessionStorage` - cleared when tab closes.
 
 ```typescript
 import { SessionState } from "@sovgut/state";
 
-SessionState.set("tempData", { expires: Date.now() + 3600000 });
-const data = SessionState.get("tempData");
+SessionState.set("draft", { subject: "", body: "" });
+const draft = SessionState.get("draft");
 ```
 
 ### MemoryState
-In-memory storage - cleared on page reload.
+
+Values are stored by reference without a JSON roundtrip, so `Date`, `Map`, `Set`, and class instances survive a get/set cycle unchanged. Stored objects are not defensively copied.
 
 ```typescript
 import { MemoryState } from "@sovgut/state";
 
 MemoryState.set("cache", new Map([["key", "value"]]));
-const cache = MemoryState.get("cache");
+const cache = MemoryState.get<Map<string, string>>("cache");
 ```
 
 ### CookieState
-HTTP cookie storage with advanced options.
+
+`set` accepts standard cookie attributes. `path` defaults to `/` and `sameSite` defaults to `lax`. When `sameSite` is `none`, `secure` is enabled automatically.
 
 ```typescript
 import { CookieState } from "@sovgut/state";
 
 CookieState.set("sessionId", "abc123", {
-  expires: 7, // days
+  expires: 7,        // days from now, or a Date
   secure: true,
-  sameSite: "strict"
+  sameSite: "strict",
 });
 ```
 
-## 🔧 Basic Usage
-
-### Setting Values
-
-All storage types support any serializable JavaScript value:
+Cookies set with a custom `path` or `domain` must be removed with the same values, because browsers require an exact match to delete a cookie:
 
 ```typescript
-// Primitives
+CookieState.set("token", value, { path: "/admin" });
+CookieState.remove("token", { path: "/admin" });
+```
+
+## Reading and writing values
+
+### Writing
+
+Values written to `LocalState`, `SessionState`, and `CookieState` are JSON-serialized. A value that cannot be serialized — `undefined`, a function, a symbol, or a circular reference — causes `set` to throw.
+
+```typescript
 LocalState.set("count", 42);
 LocalState.set("name", "Alice");
 LocalState.set("isActive", true);
-LocalState.set("bigNumber", 9007199254740991n);
-
-// Objects and Arrays
-LocalState.set("user", { id: 1, name: "Bob" });
-LocalState.set("tags", ["javascript", "typescript"]);
-
-// Complex structures
+LocalState.set("tags", ["typescript", "state"]);
 LocalState.set("settings", {
   theme: "dark",
-  notifications: {
-    email: true,
-    push: false
-  },
-  favorites: ["dashboard", "profile"]
+  notifications: { email: true, push: false },
 });
 ```
 
-### Getting Values
+### Reading
 
-#### Basic Retrieval
+`get` returns the stored value, or `undefined` when the key is absent.
 
 ```typescript
-const count = LocalState.get("count"); // 42
-const user = LocalState.get("user"); // { id: 1, name: "Bob" }
+const count = LocalState.get("count");        // 42
 const missing = LocalState.get("nonexistent"); // undefined
 ```
 
-#### With Fallback Values
+Provide a `fallback` to return a default when the key is absent or holds an empty value. The fallback also drives the inferred return type.
 
 ```typescript
-// Returns fallback if key doesn't exist
-const theme = LocalState.get("theme", { fallback: "light" }); // "light"
-
-// Fallback also determines the return type
-const score = LocalState.get("score", { fallback: 0 }); // number
+const theme = LocalState.get("theme", { fallback: "light" }); // string
+const score = LocalState.get("score", { fallback: 0 });       // number
 const tags = LocalState.get("tags", { fallback: [] as string[] }); // string[]
 ```
 
-#### Strict Mode
+Use `strict` to throw `StateDoesNotExist` when the key is absent.
 
 ```typescript
-// Throws StateDoesNotExist error if key is missing
 try {
-  const required = LocalState.get("required", { strict: true });
+  const token = LocalState.get("token", { strict: true });
 } catch (error) {
-  console.error("Key does not exist:", error.message);
+  // key was not present
 }
 ```
 
-### Removing Values
+### Removing and checking
 
 ```typescript
-// Remove single item
-LocalState.remove("user");
-
-// Clear all items
-LocalState.clear();
-
-// Check existence
-if (LocalState.has("user")) {
-  LocalState.remove("user");
-}
+LocalState.remove("user");   // remove one key
+LocalState.clear();          // remove all keys for this backend
+LocalState.has("user");      // boolean
 ```
 
-## 🎭 Type Safety & Casting
+## Type casting
 
-### Automatic Type Inference
+Provide a `cast` option to coerce a stored value to a primitive type. Supported targets are `"string"`, `"number"`, `"boolean"`, and `"bigint"`.
 
 ```typescript
-// TypeScript infers types from fallback values
-const count = LocalState.get("count", { fallback: 0 }); // number
-const name = LocalState.get("name", { fallback: "" }); // string
-const items = LocalState.get("items", { fallback: [] as Item[] }); // Item[]
+LocalState.set("value", "42");
+
+LocalState.get("value", { cast: "string" });  // "42"
+LocalState.get("value", { cast: "number" });  // 42
+LocalState.get("value", { cast: "boolean" }); // true
+LocalState.get("value", { cast: "bigint" });  // 42n
 ```
 
-### Explicit Type Casting
+An impossible cast — for example `"abc"` to `number` — returns the `fallback` when one is provided, or throws `StateInvalidCast` when `strict` is set. Boolean casting treats `"false"`, `"0"`, and `""` as `false`.
 
-```typescript
-// Cast stored values to specific types
-LocalState.set("stringNumber", "42");
-
-const asString = LocalState.get("stringNumber", { cast: "string" }); // "42"
-const asNumber = LocalState.get("stringNumber", { cast: "number" }); // 42
-const asBoolean = LocalState.get("stringNumber", { cast: "boolean" }); // true
-const asBigInt = LocalState.get("stringNumber", { cast: "bigint" }); // 42n
-```
-
-### Generic Type Parameters
+A generic parameter can be supplied to type the return value directly:
 
 ```typescript
 interface User {
   id: number;
   name: string;
-  email: string;
 }
 
-// Explicitly type the return value
 const user = LocalState.get<User>("currentUser");
-
-// With strict mode
-const user = LocalState.get<User>("currentUser", { strict: true });
+const required = LocalState.get<User>("currentUser", { strict: true });
 ```
 
-## 👁️ Observer Pattern
+## Observing changes
 
-### Event Listeners
+Each backend maintains its own listener registry, so `LocalState` listeners do not fire on `SessionState` events. Listeners receive the new value, or `null` when a key is removed or cleared.
 
 ```typescript
-import { type IStorageEventData } from "@sovgut/state";
+const handler = (value) => console.log("changed:", value);
 
-// Listen for all changes to a key
-LocalState.on("user", (event: IStorageEventData) => {
-  console.log("User changed:", event);
-});
-
-// Listen once
-LocalState.once("notification", (event) => {
-  console.log("Notification received:", event);
-});
-
-// Remove specific listener
-const handler = (event: IStorageEventData) => console.log(event);
-LocalState.on("data", handler);
-LocalState.off("data", handler);
-
-// Remove all listeners
-LocalState.removeAllListeners();
+LocalState.on("user", handler);   // subscribe
+LocalState.once("user", handler); // fire at most once
+LocalState.off("user", handler);  // unsubscribe
 ```
 
-### Cross-Component State Sync
+Note: storing an explicit `null` via `set` emits `null` as well, so a listener cannot distinguish "set to null" from "removed" by the payload alone.
+
+Additional inspection and cleanup methods are available:
 
 ```typescript
-// Component A
-LocalState.set("sharedState", { count: 1 });
-
-// Component B - automatically receives updates
-LocalState.on("sharedState", (event) => {
-  console.log("State updated in Component A:", event);
-});
+LocalState.listenerCount("user");   // number of listeners for a key
+LocalState.eventNames();            // keys with at least one listener
+LocalState.removeListener("user");  // remove all listeners for one key
+LocalState.removeAllListeners();    // remove every listener on the backend
 ```
 
-## ⚛️ React Integration
+A listener that throws is isolated: the error is logged and other listeners still run.
 
-### Custom Hook Example
+## React integration
+
+The library is framework-agnostic. A minimal hook that keeps component state synchronized with a backend:
 
 ```typescript
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LocalState, type IStorageEventData } from "@sovgut/state";
 
 function useLocalState<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => 
-    LocalState.get(key, { fallback: initialValue })
+  const [value, setValue] = useState<T>(() =>
+    LocalState.get(key, { fallback: initialValue }),
   );
 
   useEffect(() => {
@@ -284,180 +238,103 @@ function useLocalState<T>(key: string, initialValue: T) {
     return () => LocalState.off(key, handler);
   }, [key, initialValue]);
 
-  const updateValue = useCallback((newValue: T) => {
-    LocalState.set(key, newValue);
-  }, [key]);
+  const update = useCallback(
+    (next: T) => LocalState.set(key, next),
+    [key],
+  );
 
-  return [value, updateValue] as const;
+  return [value, update] as const;
 }
 
-// Usage
-function App() {
+function ThemeToggle() {
   const [theme, setTheme] = useLocalState("theme", "light");
-  
+
   return (
     <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-      Current theme: {theme}
+      {theme}
     </button>
   );
 }
 ```
 
-### Context Provider Pattern
+## API reference
 
-```typescript
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { LocalState, type IStorageEventData } from "@sovgut/state";
+The methods below are shared by all four backends unless noted otherwise.
 
-interface AppState {
-  user: User | null;
-  settings: Settings;
-}
-
-const StateContext = createContext<{
-  state: AppState;
-  updateUser: (user: User | null) => void;
-  updateSettings: (settings: Settings) => void;
-}>({} as any);
-
-export function StateProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AppState>({
-    user: LocalState.get("user", { fallback: null }),
-    settings: LocalState.get("settings", { fallback: defaultSettings })
-  });
-
-  useEffect(() => {
-    const handleUserChange = (event: IStorageEventData<User>) => {
-      setState(prev => ({ ...prev, user: event }));
-    };
-
-    const handleSettingsChange = (event: IStorageEventData<Settings>) => {
-      setState(prev => ({ ...prev, settings: event ?? defaultSettings }));
-    };
-
-    LocalState.on("user", handleUserChange);
-    LocalState.on("settings", handleSettingsChange);
-
-    return () => {
-      LocalState.off("user", handleUserChange);
-      LocalState.off("settings", handleSettingsChange);
-    };
-  }, []);
-
-  const updateUser = (user: User | null) => LocalState.set("user", user);
-  const updateSettings = (settings: Settings) => LocalState.set("settings", settings);
-
-  return (
-    <StateContext.Provider value={{ state, updateUser, updateSettings }}>
-      {children}
-    </StateContext.Provider>
-  );
-}
-
-export const useAppState = () => useContext(StateContext);
-```
-
-## 📚 API Reference
-
-### Common Methods
-
-All storage classes (`LocalState`, `SessionState`, `MemoryState`, `CookieState`) share these methods:
-
-#### `get<T>(key: string, options?: GetOptions<T>): T | undefined`
+### `get<T>(key, options?): T | undefined`
 
 Retrieves a value from storage.
 
-**Options:**
-- `fallback?: T` - Default value if key doesn't exist
-- `strict?: boolean` - Throw error if key doesn't exist
-- `cast?: 'string' | 'number' | 'boolean' | 'bigint'` - Type casting
+| Option     | Type                                          | Description                                          |
+| ---------- | --------------------------------------------- | ---------------------------------------------------- |
+| `fallback` | `T`                                           | Returned when the key is absent or holds an empty value. |
+| `strict`   | `boolean`                                     | Throw `StateDoesNotExist` when the key is absent.    |
+| `cast`     | `"string" \| "number" \| "boolean" \| "bigint"` | Coerce the stored value to a primitive type.      |
 
-#### `set<T>(key: string, value: T, options?: SetOptions): void`
+### `set<T>(key, value): void`
 
-Stores a value in storage.
+Stores a value. Throws when the value cannot be serialized or the backend rejects the write. `CookieState.set(key, value, options?)` additionally accepts cookie attributes:
 
-**Cookie-specific options:**
-- `expires?: Date | number` - Expiration date or days from now
-- `maxAge?: number` - Maximum age in seconds
-- `domain?: string` - Cookie domain
-- `path?: string` - Cookie path
-- `secure?: boolean` - HTTPS only
-- `sameSite?: 'strict' | 'lax' | 'none'` - CSRF protection
+| Option     | Type                             | Description                                             |
+| ---------- | -------------------------------- | ------------------------------------------------------- |
+| `expires`  | `Date \| number`                 | Expiration date, or number of days from now.            |
+| `maxAge`   | `number`                         | Maximum age in seconds. Takes precedence over `expires`.|
+| `domain`   | `string`                         | Domain the cookie is scoped to.                         |
+| `path`     | `string`                         | Path the cookie is scoped to. Defaults to `/`.          |
+| `secure`   | `boolean`                        | Send only over HTTPS. Required when `sameSite` is `none`. |
+| `sameSite` | `"strict" \| "lax" \| "none"`    | SameSite policy. Defaults to `lax`.                     |
 
-#### `remove(key: string): void`
+### `remove(key): void`
 
-Removes a value from storage.
+Removes a value. `CookieState.remove(key, options?)` accepts `path` and `domain`, which must match the values used when the cookie was set.
 
-#### `clear(): void`
+### `clear(): void`
 
-Removes all values from storage.
+Removes every value for the backend and emits `null` for each removed key.
 
-#### `has(key: string): boolean`
+### `has(key): boolean`
 
-Checks if a key exists in storage.
+Returns whether a key exists.
 
-### Observer Methods
+### Observer methods
 
-#### `on<T>(event: string, callback: (event: IStorageEventData<T>) => void): void`
+| Method                        | Description                                      |
+| ----------------------------- | ------------------------------------------------ |
+| `on(event, callback)`         | Add a listener.                                  |
+| `once(event, callback)`       | Add a listener that fires at most once.          |
+| `off(event, callback)`        | Remove a specific listener.                      |
+| `removeListener(event)`       | Remove all listeners for one key.                |
+| `removeAllListeners()`        | Remove every listener on the backend.            |
+| `listenerCount(event)`        | Number of listeners registered for a key.        |
+| `eventNames()`                | Keys that have at least one listener.            |
 
-Adds an event listener.
+## Error handling
 
-#### `once<T>(event: string, callback: (event: IStorageEventData<T>) => void): void`
-
-Adds a one-time event listener.
-
-#### `off<T>(event: string, callback: (event: IStorageEventData<T>) => void): void`
-
-Removes an event listener.
-
-#### `removeAllListeners(): void`
-
-Removes all event listeners.
-
-
-## 🛡️ Error Handling
-
-### Built-in Error Types
+Both error types carry structured fields for programmatic handling.
 
 ```typescript
 import { StateDoesNotExist, StateInvalidCast } from "@sovgut/state";
 
-// Handle missing keys
 try {
-  const data = LocalState.get("required", { strict: true });
+  LocalState.get("token", { strict: true });
 } catch (error) {
   if (error instanceof StateDoesNotExist) {
-    console.error(`Key "${error.key}" not found in ${error.storage}`);
+    console.error(`"${error.key}" not found in ${error.storage}`);
   }
 }
 
-// Handle invalid casts
 try {
-  LocalState.set("invalid", "not-a-number");
-  const num = LocalState.get("invalid", { cast: "number", strict: true });
+  LocalState.set("value", "not-a-number");
+  LocalState.get("value", { cast: "number", strict: true });
 } catch (error) {
   if (error instanceof StateInvalidCast) {
-    console.error(`Cannot cast "${error.value}" to ${error.type} for key "${error.key}" in ${error.storage}`);
+    console.error(
+      `cannot cast "${error.value}" to ${error.type} for "${error.key}"`,
+    );
   }
 }
 ```
 
-## 🤝 Contributing
+## License
 
-If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request on [GitHub](https://github.com/sovgut/state).
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/sovgut">sovgut</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/sovgut/state">GitHub</a> •
-  <a href="https://www.npmjs.com/package/@sovgut/state">npm</a> •
-  <a href="#-api-reference">Documentation</a>
-</p>
+Released under the [MIT License](./LICENSE).
