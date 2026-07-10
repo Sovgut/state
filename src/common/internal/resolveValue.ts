@@ -65,11 +65,9 @@ function castValue(value: unknown, target: CastTarget): unknown {
       if (typeof value === "boolean") return value ? 1 : 0;
       if (typeof value === "string") {
         const trimmed = value.trim();
-        if (trimmed === "")
-          throw new Error("Cannot cast empty string to number");
+        if (trimmed === "") throw new Error("Cannot cast empty string to number");
         const n = Number(trimmed);
-        if (Number.isNaN(n))
-          throw new Error(`Cannot cast "${value}" to number`);
+        if (Number.isNaN(n)) throw new Error(`Cannot cast "${value}" to number`);
         return n;
       }
       throw new Error(`Cannot cast ${typeof value} to number`);
@@ -100,8 +98,7 @@ function castValue(value: unknown, target: CastTarget): unknown {
       }
       if (typeof value === "string") {
         const trimmed = value.trim();
-        if (trimmed === "")
-          throw new Error("Cannot cast empty string to bigint");
+        if (trimmed === "") throw new Error("Cannot cast empty string to bigint");
         return BigInt(trimmed);
       }
       throw new Error(`Cannot cast ${typeof value} to bigint`);
@@ -122,7 +119,7 @@ export function resolveValue<T>(
   result: FetchResult,
   options: Options<T>,
   storageName: string,
-  key: string,
+  key: string
 ): T | undefined {
   if (!result.found) {
     if (options.strict) {

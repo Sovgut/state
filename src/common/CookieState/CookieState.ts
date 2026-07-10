@@ -1,6 +1,6 @@
-import { Observer } from "~/common/Observer/Observer.ts";
-import { resolveValue, type Options } from "~/common/internal/resolveValue.ts";
 import { hasDocumentCookie } from "~/common/internal/env.ts";
+import { type Options, resolveValue } from "~/common/internal/resolveValue.ts";
+import { Observer } from "~/common/Observer/Observer.ts";
 
 const STORAGE_NAME = "cookies";
 
@@ -33,15 +33,18 @@ export type CookieOptions = {
  * RFC 6265 forbids these characters in cookie names: control characters,
  * whitespace, and any of: () < > @ , ; : \ " / [ ] ? = { }
  */
-// eslint-disable-next-line no-control-regex
-const INVALID_COOKIE_NAME_CHARS = /[\x00-\x20\x7F()<>@,;:\\"/[\]?={}]/;
+// RFC 6265 separators/special characters (control characters are checked separately
+// so we don't have to embed unsafe control-char ranges in a regex literal).
+const INVALID_COOKIE_NAME_CHARS = /[()<>@,;:\\"/[\]?={}]/;
 
 function isValidCookieName(name: string): boolean {
-  return (
-    typeof name === "string" &&
-    name.length > 0 &&
-    !INVALID_COOKIE_NAME_CHARS.test(name)
-  );
+  if (typeof name !== "string" || name.length === 0) return false;
+  for (let i = 0; i < name.length; i++) {
+    const code = name.charCodeAt(i);
+    // Reject control characters (0x00–0x20), space, and DEL (0x7F).
+    if (code <= 0x20 || code === 0x7f) return false;
+  }
+  return !INVALID_COOKIE_NAME_CHARS.test(name);
 }
 
 /**
@@ -91,19 +94,10 @@ function readCookie(key: string): string | null {
  *  - `secure` auto-enabled when `sameSite: 'none'` (browser requirement).
  */
 export class CookieState extends Observer {
-  static get<T = unknown>(
-    key: string,
-    options: Options<T> & { strict: true },
-  ): T;
-  static get<T = unknown>(
-    key: string,
-    options: Options<T> & { fallback: T },
-  ): T;
+  static get<T = unknown>(key: string, options: Options<T> & { strict: true }): T;
+  static get<T = unknown>(key: string, options: Options<T> & { fallback: T }): T;
   static get<T = unknown>(key: string, options?: Options<T>): T | undefined;
-  static get<T = unknown>(
-    key: string,
-    options: Options<T> = {},
-  ): T | undefined {
+  static get<T = unknown>(key: string, options: Options<T> = {}): T | undefined {
     const raw = readCookie(key);
 
     if (raw === null) {
@@ -118,12 +112,7 @@ export class CookieState extends Observer {
       parsed = raw;
     }
 
-    return resolveValue<T>(
-      { found: true, value: parsed },
-      options,
-      STORAGE_NAME,
-      key,
-    );
+    return resolveValue<T>({ found: true, value: parsed }, options, STORAGE_NAME, key);
   }
 
   /**
@@ -133,18 +122,14 @@ export class CookieState extends Observer {
    *         value is not JSON-serialisable, or when SameSite=None is used
    *         without Secure (browser would reject it silently).
    */
-  static set<T = unknown>(
-    key: string,
-    value: T,
-    options: CookieOptions = {},
-  ): void {
+  static set<T = unknown>(key: string, value: T, options: CookieOptions = {}): void {
     if (!hasDocumentCookie()) {
       throw new Error("document.cookie is not available in this environment.");
     }
 
     if (!isValidCookieName(key)) {
       throw new Error(
-        `Invalid cookie name "${key}": names cannot be empty or contain whitespace, control characters, or any of: ()<>@,;:\\"/[]?={}`,
+        `Invalid cookie name "${key}": names cannot be empty or contain whitespace, control characters, or any of: ()<>@,;:\\"/[]?={}`
       );
     }
 
@@ -152,15 +137,11 @@ export class CookieState extends Observer {
     try {
       serialized = JSON.stringify(value);
     } catch (err) {
-      throw new Error(
-        `Cannot serialize cookie value for key "${key}": ${(err as Error).message}`,
-      );
+      throw new Error(`Cannot serialize cookie value for key "${key}": ${(err as Error).message}`);
     }
 
     if (serialized === undefined) {
-      throw new Error(
-        `Cannot set cookie "${key}": value is not serializable (undefined, function, or symbol).`,
-      );
+      throw new Error(`Cannot set cookie "${key}": value is not serializable (undefined, function, or symbol).`);
     }
 
     // --- Defaults --------------------------------------------------------
@@ -172,7 +153,7 @@ export class CookieState extends Observer {
 
     if (sameSite === "none" && !secure) {
       throw new Error(
-        `Cookie "${key}": SameSite=None requires Secure=true. The browser will silently reject this cookie.`,
+        `Cookie "${key}": SameSite=None requires Secure=true. The browser will silently reject this cookie.`
       );
     }
 
@@ -213,20 +194,17 @@ export class CookieState extends Observer {
 
     // Warn about size — browsers silently drop oversized cookies.
     if (cookieString.length > MAX_COOKIE_SIZE) {
-      // eslint-disable-next-line no-console
       console.warn(
         `[CookieState] Cookie "${key}" is ${cookieString.length} bytes, ` +
           `which exceeds the typical ${MAX_COOKIE_SIZE}-byte per-cookie limit. ` +
-          `The browser may silently drop it.`,
+          `The browser may silently drop it.`
       );
     }
 
     try {
       document.cookie = cookieString;
     } catch (err) {
-      throw new Error(
-        `Failed to set cookie "${key}": ${(err as Error).message}`,
-      );
+      throw new Error(`Failed to set cookie "${key}": ${(err as Error).message}`);
     }
 
     CookieState.emit(key, value);
@@ -240,10 +218,7 @@ export class CookieState extends Observer {
    * uses `path: '/'`, which matches the default of `set()`. If you set a
    * cookie with a custom path or domain, pass the same values here.
    */
-  static remove(
-    key: string,
-    options: Pick<CookieOptions, "path" | "domain"> = {},
-  ): void {
+  static remove(key: string, options: Pick<CookieOptions, "path" | "domain"> = {}): void {
     if (!hasDocumentCookie()) return;
 
     const path = options.path ?? "/";

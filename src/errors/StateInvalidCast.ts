@@ -33,10 +33,10 @@ export class StateInvalidCast extends Error {
     public readonly key: string,
     public readonly storage: string = "storage",
     public readonly value: unknown,
-    public readonly type: string,
+    public readonly type: string
   ) {
     super(
-      `Cannot cast value for key "${key}" in ${storage} to type "${type}". Value: ${stringifyValueForMessage(value)}`,
+      `Cannot cast value for key "${key}" in ${storage} to type "${type}". Value: ${stringifyValueForMessage(value)}`
     );
     this.name = "StateInvalidCast";
     Object.setPrototypeOf(this, StateInvalidCast.prototype);

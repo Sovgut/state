@@ -1,6 +1,6 @@
-import { Observer } from "~/common/Observer/Observer.ts";
-import { resolveValue, type Options } from "~/common/internal/resolveValue.ts";
 import { hasSessionStorage } from "~/common/internal/env.ts";
+import { type Options, resolveValue } from "~/common/internal/resolveValue.ts";
+import { Observer } from "~/common/Observer/Observer.ts";
 
 const STORAGE_NAME = "sessionStorage";
 
@@ -51,22 +51,17 @@ export class SessionState extends Observer {
     try {
       serialized = JSON.stringify(value);
     } catch (err) {
-      throw new Error(
-        `Cannot serialize value for key "${key}" in ${STORAGE_NAME}: ${(err as Error).message}`,
-      );
+      throw new Error(`Cannot serialize value for key "${key}" in ${STORAGE_NAME}: ${(err as Error).message}`);
     }
 
     if (serialized === undefined) {
       throw new Error(
-        `Cannot store value for key "${key}" in ${STORAGE_NAME}: value is not serializable (undefined, function, or symbol).`,
+        `Cannot store value for key "${key}" in ${STORAGE_NAME}: value is not serializable (undefined, function, or symbol).`
       );
     }
 
-    try {
-      sessionStorage.setItem(key, serialized);
-    } catch (err) {
-      throw err;
-    }
+    // May throw QuotaExceededError or SecurityError — let it propagate to the caller.
+    sessionStorage.setItem(key, serialized);
 
     SessionState.emit(key, value);
   }

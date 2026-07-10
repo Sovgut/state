@@ -1,5 +1,5 @@
+import { type Options, resolveValue } from "~/common/internal/resolveValue.ts";
 import { Observer } from "~/common/Observer/Observer.ts";
-import { resolveValue, type Options } from "~/common/internal/resolveValue.ts";
 
 const STORAGE_NAME = "memory";
 

@@ -24,11 +24,7 @@ export function hasSessionStorage(): boolean {
 
 export function hasDocumentCookie(): boolean {
   try {
-    return (
-      typeof document !== "undefined" &&
-      document !== null &&
-      "cookie" in document
-    );
+    return typeof document !== "undefined" && document !== null && "cookie" in document;
   } catch {
     return false;
   }

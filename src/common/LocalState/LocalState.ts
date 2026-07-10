@@ -1,6 +1,6 @@
-import { Observer } from "~/common/Observer/Observer.ts";
-import { resolveValue, type Options } from "~/common/internal/resolveValue.ts";
 import { hasLocalStorage } from "~/common/internal/env.ts";
+import { type Options, resolveValue } from "~/common/internal/resolveValue.ts";
+import { Observer } from "~/common/Observer/Observer.ts";
 
 const STORAGE_NAME = "localStorage";
 
@@ -61,23 +61,17 @@ export class LocalState extends Observer {
     try {
       serialized = JSON.stringify(value);
     } catch (err) {
-      throw new Error(
-        `Cannot serialize value for key "${key}" in ${STORAGE_NAME}: ${(err as Error).message}`,
-      );
+      throw new Error(`Cannot serialize value for key "${key}" in ${STORAGE_NAME}: ${(err as Error).message}`);
     }
 
     if (serialized === undefined) {
       throw new Error(
-        `Cannot store value for key "${key}" in ${STORAGE_NAME}: value is not serializable (undefined, function, or symbol).`,
+        `Cannot store value for key "${key}" in ${STORAGE_NAME}: value is not serializable (undefined, function, or symbol).`
       );
     }
 
-    try {
-      localStorage.setItem(key, serialized);
-    } catch (err) {
-      // QuotaExceededError, SecurityError — preserve original error for diagnostics
-      throw err;
-    }
+    // May throw QuotaExceededError or SecurityError — let it propagate to the caller.
+    localStorage.setItem(key, serialized);
 
     LocalState.emit(key, value);
   }
